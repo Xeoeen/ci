@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+CI_RED="1;31"
+CI_GREEN="1;32"
+
+function ci-ansi-col-escape {
+	ARG_VALUES=$1
+	echo "\033["$ARG_VALUES"m"
+}
+function ci-colored {
+	ARG_COLOR=$1
+	ARG_TEXT=$2
+	printf $(ci-ansi-col-escape $ARG_COLOR)$ARG_TEXT
+}
+
+CI_SUBCMD=$1
+shift
+ci-$CI_SUBCMD "$@"
