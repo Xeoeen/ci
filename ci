@@ -13,10 +13,13 @@ function ci-ansi-col-escape {
 	ARG_VALUES=$1
 	echo "\033["$ARG_VALUES"m"
 }
+function ci-ansi-col-reset {
+	echo "\033[0m"
+}
 function ci-colored {
 	ARG_COLOR=$1
 	ARG_TEXT=$2
-	printf $(ci-ansi-col-escape $ARG_COLOR)$ARG_TEXT
+	printf "$(ci-ansi-col-escape $ARG_COLOR)$ARG_TEXT$(ci-ansi-col-reset)"
 }
 
 function ci-strip-cpp-ext {
@@ -26,6 +29,24 @@ function ci-strip-cpp-ext {
 function ci-build {
 	ARG_SOURCE=$1
 	$CI_CPP_COMPILER $CI_CPP_STANDARD $CI_CPP_WARNINGS $CI_CPP_DEBUG $ARG_SOURCE -o $(ci-strip-cpp-ext $ARG_SOURCE).e
+}
+
+function ci-check-test {
+	ARG_NAME=$1
+	ARG_EXE1=$2
+	ARG_EXE2=$3
+	ARG_TEST_STR=$4
+	OUTPUT1=$($ARG_EXE1 <<< $ARG_TEST_STR)
+	OUTPUT2=$($ARG_EXE2 <<< $ARG_TEST_STR)
+	diff -bew <(echo $OUTPUT1) <(echo $OUTPUT2) &> /dev/null
+	DIFF_RESULT=$?
+	if [ $DIFF_RESULT -eq 0 ] ; then
+		ci-colored $CI_GREEN 'TEST RUN SUCCESS'
+	else
+		ci-colored $CI_RED 'TEST RUN FAILURE'
+	fi
+	echo " "$ARG_NAME
+	return $DIFF_RESULT
 }
 
 CI_SUBCMD=$1
