@@ -22,13 +22,14 @@ function ci-colored {
 	printf "$(ci-ansi-col-escape $ARG_COLOR)$ARG_TEXT$(ci-ansi-col-reset)"
 }
 
-function ci-strip-cpp-ext {
-	ARG=$1
-	echo $(sed -r 's/\.cpp$//g' <<< $ARG)
+function ci-strip-ext {
+	ARG_EXT=$1
+	ARG_FILE=$2
+	echo $(sed -r s/\\.$ARG_EXT//g <<< $ARG_FILE)
 }
 function ci-build {
 	ARG_SOURCE=$1
-	$CI_CPP_COMPILER $CI_CPP_STANDARD $CI_CPP_WARNINGS $CI_CPP_DEBUG $ARG_SOURCE -o $(ci-strip-cpp-ext $ARG_SOURCE).e
+	$CI_CPP_COMPILER $CI_CPP_STANDARD $CI_CPP_WARNINGS $CI_CPP_DEBUG $ARG_SOURCE -o $(ci-strip-ext cpp $ARG_SOURCE).e
 }
 
 function ci-check-test {
@@ -63,6 +64,22 @@ function ci-autotest {
 		fi
 		let "I += 1"
 	done
+}
+
+function ci-test-one {
+	ARG_EXE=$1
+	ARG_TESTNAME=$2
+	TEST_INPUT_FILE="$ARG_TESTNAME.in"
+	TEST_OUTPUT_FILE="$ARG_TESTNAME.out"
+	ci-check-test "$ARG_TESTNAME" "$ARG_EXE" "cat $TEST_OUTPUT_FILE" "$(cat $TEST_INPUT_FILE)"
+}
+function ci-test {
+	ARG_EXE=$1
+	ARG_TESTDIR=$2
+	for INFILE in $ARG_TESTDIR/**/*.in ; do
+		TEST_NAME=$(ci-strip-ext "in" "$INFILE" | sed 's#//*#/#g')
+		ci-test-one "$ARG_EXE" "$TEST_NAME"
+	done;
 }
 
 CI_SUBCMD=$1
