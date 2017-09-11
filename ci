@@ -4,7 +4,7 @@ CI_RED="1;31"
 CI_GREEN="1;32"
 
 CI_CPP_COMPILER="c++"
-CI_CPP_STANDARD="-std=c++14"
+CI_CPP_STANDARD="-std=c++11"
 CI_CPP_WARNINGS="-Wall -Wextra"
 CI_CPP_DEBUG="-g -D_GLIBCXX_DEBUG"
 CI_CPP_OPTIMISE="-O2 -static -lm"
