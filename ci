@@ -41,20 +41,12 @@ function ci-build {
 	$CI_CPP_COMPILER $CI_CPP_STANDARD $CI_CPP_WARNINGS $CI_CPP_DEBUG $ARG_SOURCE -o $(ci-strip-ext cpp $ARG_SOURCE).e
 }
 
-function ci-get-time {
-	ARG_EXE=$1
-	ARG_INPUT=$2
-	TIMINGS=$(/usr/bin/time --format="%Us" $ARG_EXE <<< $ARG_INPUT 2>&1 > /dev/null)
-	echo $TIMINGS
-}
-
 function ci-check-test {
 	ARG_NAME=$1
 	ARG_EXE1=$2
 	ARG_EXE2=$3
 	ARG_TEST_STR=$4
 	OUTPUT1=$($ARG_EXE1 <<< $ARG_TEST_STR)
-	RUNNING_TIME=$(ci-get-time $ARG_EXE1 $ARG_TEST_STR)
 	OUTPUT2=$($ARG_EXE2 <<< $ARG_TEST_STR)
 	diff -bew <(echo $OUTPUT1) <(echo $OUTPUT2) &> /dev/null
 	DIFF_RESULT=$?
@@ -63,7 +55,6 @@ function ci-check-test {
 	else
 		ci-colored $CI_RED 'TEST RUN FAILURE'
 	fi
-	ci-colored $CI_WHITE " $RUNNING_TIME"
 	echo " "$ARG_NAME
 	return $DIFF_RESULT
 }
