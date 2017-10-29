@@ -1,0 +1,7 @@
+[package]
+name = "ci"
+version = "0.1.0"
+authors = ["Mateusz Cegiełka <mateusz@cegla.net>"]
+
+[dependencies]
+clap = "2.26.2"
