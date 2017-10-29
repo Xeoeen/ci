@@ -1,6 +1,12 @@
+#![feature(io)]
+
 extern crate clap;
+extern crate walkdir;
+extern crate colored;
 
 use std::path::{Path};
+use std::io::{Read};
+use colored::*;
 
 fn compile_cpp(source: &Path, output: &Path) {
     let mut kid = std::process::Command::new("c++")
@@ -17,6 +23,34 @@ fn run_build(args: &clap::ArgMatches) {
     compile_cpp(source_name, &exec_name);
 }
 
+fn run_test(args: &clap::ArgMatches) {
+    let exec = args.value_of("exec").unwrap();
+    let testdir = args.value_of("testdir").unwrap();
+    for entry in walkdir::WalkDir::new(testdir).follow_links(true).into_iter().filter_map(|e| e.ok()) {
+        if let Some(ext) = entry.path().extension() {
+            if ext != "in" { continue }
+            let in_path = entry.path();
+            let out_path = in_path.with_extension("out");
+
+            let kid = std::process::Command::new(exec)
+                .stdin(std::fs::File::open(in_path).unwrap())
+                .stdout(std::process::Stdio::piped())
+                .spawn().unwrap();
+            let out_file = std::fs::File::open(out_path).unwrap();
+            let output_kid = kid.stdout.unwrap().chars().map(Result::unwrap);
+            let output_perfect = out_file.chars().map(Result::unwrap);
+
+            let correct = Iterator::eq(output_kid, output_perfect);
+
+            if correct {
+                println!("{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
+            } else {
+                println!("{} {}", "TEST RUN FAILURE".red().bold(), in_path.display());
+            }
+        }
+    }
+}
+
 fn main() {
     let args = clap::App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
@@ -29,8 +63,19 @@ fn main() {
                 .value_name("INPUT")
                 .required(true)
                 .index(1)))
+        .subcommand(clap::SubCommand::with_name("test")
+            .arg(clap::Arg::with_name("exec")
+                .value_name("EXEC")
+                .required(true)
+                .index(1))
+            .arg(clap::Arg::with_name("testdir")
+                .value_name("TESTDIR")
+                .required(true)
+                .index(2)))
         .get_matches();
     if let Some(subcmd_args) = args.subcommand_matches("build") {
         run_build(subcmd_args);
+    } else if let Some(subcmd_args) = args.subcommand_matches("test") {
+        run_test(subcmd_args);
     }
 }

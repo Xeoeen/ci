@@ -5,3 +5,5 @@ authors = ["Mateusz Cegiełka <mateusz@cegla.net>"]
 
 [dependencies]
 clap = "2.26.2"
+walkdir = "2"
+colored = "1.5.3"
