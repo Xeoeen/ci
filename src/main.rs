@@ -23,6 +23,28 @@ fn run_build(args: &clap::ArgMatches) {
     compile_cpp(source_name, &exec_name);
 }
 
+fn equal_bew(a: &str, b: &str) -> bool {
+    let mut i = a.chars().peekable();
+    let mut j = b.chars().peekable();
+    while i.peek().is_some() && j.peek().is_some() {
+        if i.peek().unwrap().is_whitespace() && j.peek().unwrap().is_whitespace() {
+            while i.peek().map(|c| c.is_whitespace()).unwrap_or(false) {
+                i.next();
+            }
+            while j.peek().map(|c| c.is_whitespace()).unwrap_or(false) {
+                j.next();
+            }
+        } else {
+            if i.peek() != j.peek() {
+                return false;
+            }
+            i.next();
+            j.next();
+        }
+    }
+    return i.peek().is_none() && j.peek().is_none();
+}
+
 fn run_test(args: &clap::ArgMatches) {
     let exec = args.value_of("exec").unwrap();
     let testdir = args.value_of("testdir").unwrap();
@@ -36,11 +58,13 @@ fn run_test(args: &clap::ArgMatches) {
                 .stdin(std::fs::File::open(in_path).unwrap())
                 .stdout(std::process::Stdio::piped())
                 .spawn().unwrap();
-            let out_file = std::fs::File::open(out_path).unwrap();
-            let output_kid = kid.stdout.unwrap().chars().map(Result::unwrap);
-            let output_perfect = out_file.chars().map(Result::unwrap);
+            let mut out_file = std::fs::File::open(out_path).unwrap();
+            let mut output_kid = String::new(); //kid.stdout.unwrap().chars().map(Result::unwrap);
+            let mut output_perfect = String::new(); //out_file.chars().map(Result::unwrap);
+            kid.stdout.unwrap().read_to_string(&mut output_kid).unwrap();
+            out_file.read_to_string(&mut output_perfect).unwrap();
 
-            let correct = Iterator::eq(output_kid, output_perfect);
+            let correct = equal_bew(&output_kid, &output_perfect);
 
             if correct {
                 println!("{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
