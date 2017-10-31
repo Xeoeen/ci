@@ -9,9 +9,18 @@ use std::path::{Path};
 use std::io::{Read, Write};
 use colored::*;
 
-fn compile_cpp(source: &Path, output: &Path) {
+fn compile_cpp(source: &Path, output: &Path, release: bool) {
+    let mut args = vec!["-std=c++11", "-Wall", "-Wextra"];
+    if release {
+        args.push("-O2");
+    } else {
+        args.extend_from_slice(&["-g", "-D_GLIBCXX_DEBUG"]);
+    }
+    args.push(source.to_str().unwrap());
+    args.push("-o");
+    args.push(output.to_str().unwrap());
     let mut kid = std::process::Command::new("c++")
-        .args(&["-std=c++11", "-Wall", "-Wextra", "-g", "-D_GLIBCXX_DEBUG", source.to_str().unwrap(), "-o", output.to_str().unwrap()])
+        .args(&args)
         .stderr(std::process::Stdio::inherit())
         .spawn().unwrap();
     kid.wait().unwrap();
@@ -21,7 +30,8 @@ fn run_build(args: &clap::ArgMatches) {
     let source_name = Path::new(args.value_of("input").unwrap());
     assert!(source_name.extension().unwrap() == "cpp");
     let exec_name = source_name.with_extension("e");
-    compile_cpp(source_name, &exec_name);
+    let release = args.is_present("release");
+    compile_cpp(source_name, &exec_name, release);
 }
 
 fn equal_bew(a: &str, b: &str) -> bool {
@@ -87,7 +97,10 @@ fn main() {
                 .long("input")
                 .value_name("INPUT")
                 .required(true)
-                .index(1)))
+                .index(1))
+            .arg(clap::Arg::with_name("release")
+                .short("O")
+                .long("release")))
         .subcommand(clap::SubCommand::with_name("test")
             .arg(clap::Arg::with_name("exec")
                 .value_name("EXEC")
