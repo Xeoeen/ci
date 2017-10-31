@@ -49,6 +49,7 @@ fn equal_bew(a: &str, b: &str) -> bool {
 fn run_test<F: Fn(&Path, &Path, &str) -> bool>(args: &clap::ArgMatches, f: F) {
     let exec = args.value_of("exec").unwrap();
     let testdir = args.value_of("testdir").unwrap();
+    let print_success = !args.is_present("no-print-success");
     for entry in walkdir::WalkDir::new(testdir).follow_links(true).into_iter().filter_map(|e| e.ok()) {
         if let Some(ext) = entry.path().extension() {
             if ext != "in" { continue }
@@ -65,7 +66,9 @@ fn run_test<F: Fn(&Path, &Path, &str) -> bool>(args: &clap::ArgMatches, f: F) {
             let correct = f(in_path, &out_path, &output_kid);
 
             if correct {
-                println!("{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
+                if print_success {
+                    println!("{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
+                }
             } else {
                 println!("{} {}", "TEST RUN FAILURE".red().bold(), in_path.display());
             }
@@ -96,7 +99,9 @@ fn main() {
                 .index(2))
             .arg(clap::Arg::with_name("checker")
                 .long("checker")
-                .takes_value(true)))
+                .takes_value(true))
+            .arg(clap::Arg::with_name("no-print-success")
+                .long("no-print-success")))
         .get_matches();
     if let Some(subcmd_args) = args.subcommand_matches("build") {
         run_build(subcmd_args);
