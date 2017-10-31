@@ -3,9 +3,10 @@
 extern crate clap;
 extern crate walkdir;
 extern crate colored;
+extern crate tempfile;
 
 use std::path::{Path};
-use std::io::{Read};
+use std::io::{Read, Write};
 use colored::*;
 
 fn compile_cpp(source: &Path, output: &Path) {
@@ -92,16 +93,31 @@ fn main() {
             .arg(clap::Arg::with_name("testdir")
                 .value_name("TESTDIR")
                 .required(true)
-                .index(2)))
+                .index(2))
+            .arg(clap::Arg::with_name("checker")
+                .long("checker")
+                .takes_value(true)))
         .get_matches();
     if let Some(subcmd_args) = args.subcommand_matches("build") {
         run_build(subcmd_args);
     } else if let Some(subcmd_args) = args.subcommand_matches("test") {
-        run_test(subcmd_args, |_in_path, out_path, mine_str| -> bool {
-            let mut out_file = std::fs::File::open(out_path).unwrap();
-            let mut out_str = String::new();
-            out_file.read_to_string(&mut out_str).unwrap();
-            equal_bew(mine_str, &out_str)
-        });
+        if let Some(checker) = subcmd_args.value_of("checker") {
+            run_test(subcmd_args, |in_path, out_path, mine_str| -> bool {
+                let mut mine_file = tempfile::NamedTempFile::new().unwrap();
+                write!(mine_file, "{}", mine_str).unwrap();
+                let mine_path = mine_file.path();
+                std::process::Command::new(checker)
+                    .args(&[in_path, mine_path, out_path])
+                    .status().unwrap()
+                    .success()
+            });
+        } else {
+            run_test(subcmd_args, |_in_path, out_path, mine_str| -> bool {
+                let mut out_file = std::fs::File::open(out_path).unwrap();
+                let mut out_str = String::new();
+                out_file.read_to_string(&mut out_str).unwrap();
+                equal_bew(mine_str, &out_str)
+            });
+        }
     }
 }
