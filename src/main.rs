@@ -45,7 +45,7 @@ fn equal_bew(a: &str, b: &str) -> bool {
     return i.peek().is_none() && j.peek().is_none();
 }
 
-fn run_test(args: &clap::ArgMatches) {
+fn run_test<F: Fn(&Path, &Path, &str) -> bool>(args: &clap::ArgMatches, f: F) {
     let exec = args.value_of("exec").unwrap();
     let testdir = args.value_of("testdir").unwrap();
     for entry in walkdir::WalkDir::new(testdir).follow_links(true).into_iter().filter_map(|e| e.ok()) {
@@ -58,13 +58,10 @@ fn run_test(args: &clap::ArgMatches) {
                 .stdin(std::fs::File::open(in_path).unwrap())
                 .stdout(std::process::Stdio::piped())
                 .spawn().unwrap();
-            let mut out_file = std::fs::File::open(out_path).unwrap();
-            let mut output_kid = String::new(); //kid.stdout.unwrap().chars().map(Result::unwrap);
-            let mut output_perfect = String::new(); //out_file.chars().map(Result::unwrap);
+            let mut output_kid = String::new();
             kid.stdout.unwrap().read_to_string(&mut output_kid).unwrap();
-            out_file.read_to_string(&mut output_perfect).unwrap();
 
-            let correct = equal_bew(&output_kid, &output_perfect);
+            let correct = f(in_path, &out_path, &output_kid);
 
             if correct {
                 println!("{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
@@ -100,6 +97,11 @@ fn main() {
     if let Some(subcmd_args) = args.subcommand_matches("build") {
         run_build(subcmd_args);
     } else if let Some(subcmd_args) = args.subcommand_matches("test") {
-        run_test(subcmd_args);
+        run_test(subcmd_args, |_in_path, out_path, mine_str| -> bool {
+            let mut out_file = std::fs::File::open(out_path).unwrap();
+            let mut out_str = String::new();
+            out_file.read_to_string(&mut out_str).unwrap();
+            equal_bew(mine_str, &out_str)
+        });
     }
 }
