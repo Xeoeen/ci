@@ -56,7 +56,7 @@ fn equal_bew(a: &str, b: &str) -> bool {
     return i.peek().is_none() && j.peek().is_none();
 }
 
-fn run_test<F: Fn(&Path, &Path, &str) -> bool>(args: &clap::ArgMatches, f: F) {
+fn run_test(args: &clap::ArgMatches, checker: Box<Checker>) {
     let exec = args.value_of("exec").unwrap();
     let testdir = args.value_of("testdir").unwrap();
     let print_success = !args.is_present("no-print-success");
@@ -73,7 +73,7 @@ fn run_test<F: Fn(&Path, &Path, &str) -> bool>(args: &clap::ArgMatches, f: F) {
             let result = kid.wait_with_output().unwrap();
             let output_kid = String::from_utf8(result.stdout).unwrap();
 
-            let correct = f(in_path, &out_path, &output_kid);
+            let correct = checker.check(in_path, &out_path, &output_kid);
 
             if correct {
                 if print_success {
@@ -84,6 +84,33 @@ fn run_test<F: Fn(&Path, &Path, &str) -> bool>(args: &clap::ArgMatches, f: F) {
             }
         }
     }
+}
+
+trait Checker {
+	fn check(&self, in_path: &Path, out_path: &Path, mine_str: &str) -> bool;
+}
+struct CheckerDiffOut;
+impl Checker for CheckerDiffOut {
+	fn check(&self, _in_path: &Path, out_path: &Path, mine_str: &str) -> bool {
+		let mut out_file = std::fs::File::open(out_path).unwrap();
+		let mut out_str = String::new();
+		out_file.read_to_string(&mut out_str).unwrap();
+		equal_bew(mine_str, &out_str)
+	}
+}
+struct CheckerApp {
+	app: String,
+}
+impl Checker for CheckerApp {
+	fn check(&self, in_path: &Path, out_path: &Path, mine_str: &str) -> bool {
+		let mut mine_file = tempfile::NamedTempFile::new().unwrap();
+		write!(mine_file, "{}", mine_str).unwrap();
+		let mine_path = mine_file.path();
+		std::process::Command::new(&self.app)
+			.args(&[in_path, mine_path, out_path])
+			.status().unwrap()
+			.success()
+	}
 }
 
 fn main() {
@@ -119,23 +146,11 @@ fn main() {
     if let Some(subcmd_args) = args.subcommand_matches("build") {
         run_build(subcmd_args);
     } else if let Some(subcmd_args) = args.subcommand_matches("test") {
-        if let Some(checker) = subcmd_args.value_of("checker") {
-            run_test(subcmd_args, |in_path, out_path, mine_str| -> bool {
-                let mut mine_file = tempfile::NamedTempFile::new().unwrap();
-                write!(mine_file, "{}", mine_str).unwrap();
-                let mine_path = mine_file.path();
-                std::process::Command::new(checker)
-                    .args(&[in_path, mine_path, out_path])
-                    .status().unwrap()
-                    .success()
-            });
+		let checker: Box<Checker> = if let Some(checker_app) = subcmd_args.value_of("checker") {
+			Box::new(CheckerApp { app: checker_app.to_owned() })
         } else {
-            run_test(subcmd_args, |_in_path, out_path, mine_str| -> bool {
-                let mut out_file = std::fs::File::open(out_path).unwrap();
-                let mut out_str = String::new();
-                out_file.read_to_string(&mut out_str).unwrap();
-                equal_bew(mine_str, &out_str)
-            });
-        }
+			Box::new(CheckerDiffOut {})
+        };
+		run_test(subcmd_args, checker);
     }
 }
