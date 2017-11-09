@@ -70,8 +70,8 @@ fn run_test<F: Fn(&Path, &Path, &str) -> bool>(args: &clap::ArgMatches, f: F) {
                 .stdin(std::fs::File::open(in_path).unwrap())
                 .stdout(std::process::Stdio::piped())
                 .spawn().unwrap();
-            let mut output_kid = String::new();
-            kid.stdout.unwrap().read_to_string(&mut output_kid).unwrap();
+            let result = kid.wait_with_output().unwrap();
+            let output_kid = String::from_utf8(result.stdout).unwrap();
 
             let correct = f(in_path, &out_path, &output_kid);
 
