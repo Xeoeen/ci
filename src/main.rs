@@ -56,32 +56,36 @@ fn equal_bew(a: &str, b: &str) -> bool {
     return i.peek().is_none() && j.peek().is_none();
 }
 
+fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>> {
+	Box::new(walkdir::WalkDir::new(testdir).follow_links(true)
+		.into_iter()
+		.filter_map(|e| e.ok())
+		.map(|entry| entry.path().to_path_buf())
+		.filter(|path| path.extension().map(|ext| ext == "in").unwrap_or(false)))
+}
+
 fn run_test(args: &clap::ArgMatches, checker: Box<Checker>) {
     let exec = args.value_of("exec").unwrap();
-    let testdir = args.value_of("testdir").unwrap();
+    let testdir = Path::new(args.value_of("testdir").unwrap());
     let print_success = !args.is_present("no-print-success");
-    for entry in walkdir::WalkDir::new(testdir).follow_links(true).into_iter().filter_map(|e| e.ok()) {
-        if let Some(ext) = entry.path().extension() {
-            if ext != "in" { continue }
-            let in_path = entry.path();
-            let out_path = in_path.with_extension("out");
+	for ref in_path in recursive_find_tests(testdir) {
+        let out_path = in_path.with_extension("out");
 
-            let kid = std::process::Command::new(exec)
-                .stdin(std::fs::File::open(in_path).unwrap())
-                .stdout(std::process::Stdio::piped())
-                .spawn().unwrap();
-            let result = kid.wait_with_output().unwrap();
-            let output_kid = String::from_utf8(result.stdout).unwrap();
+        let kid = std::process::Command::new(exec)
+            .stdin(std::fs::File::open(in_path).unwrap())
+            .stdout(std::process::Stdio::piped())
+            .spawn().unwrap();
+        let result = kid.wait_with_output().unwrap();
+        let output_kid = String::from_utf8(result.stdout).unwrap();
 
-            let correct = checker.check(in_path, &out_path, &output_kid);
+        let correct = checker.check(in_path, &out_path, &output_kid);
 
-            if correct {
-                if print_success {
-                    println!("{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
-                }
-            } else {
-                println!("{} {}", "TEST RUN FAILURE".red().bold(), in_path.display());
+        if correct {
+            if print_success {
+                println!("{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
             }
+        } else {
+            println!("{} {}", "TEST RUN FAILURE".red().bold(), in_path.display());
         }
     }
 }
