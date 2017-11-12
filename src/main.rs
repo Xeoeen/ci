@@ -4,10 +4,27 @@ extern crate clap;
 extern crate walkdir;
 extern crate colored;
 extern crate tempfile;
+extern crate pbr;
 
 use std::path::{Path};
 use std::io::{Read, Write};
 use colored::*;
+
+macro_rules! pb_interwrite {
+	($pb:expr, $fmt:expr) => {
+		std::io::stdout().write(format!("\r\x1B[K{}\n", $fmt).as_bytes()).unwrap();
+		std::io::stdout().flush().unwrap();
+		$pb.tick();
+	};
+	($pb:expr, $fmt:expr $(,$arg:expr)*) => {
+		{
+			let msg = format!($fmt $(,$arg)*);
+			std::io::stdout().write(format!("\r\x1B[K{}\n", msg).as_bytes()).unwrap();
+			std::io::stdout().flush().unwrap();
+			$pb.tick();
+		}
+	};
+}
 
 fn compile_cpp(source: &Path, output: &Path, release: bool) {
     let mut args = vec!["-std=c++11", "-Wall", "-Wextra"];
@@ -68,6 +85,8 @@ fn run_test(args: &clap::ArgMatches, checker: Box<Checker>) {
     let exec = args.value_of("exec").unwrap();
     let testdir = Path::new(args.value_of("testdir").unwrap());
     let print_success = !args.is_present("no-print-success");
+	let test_count = recursive_find_tests(testdir).count();
+	let mut pb = pbr::ProgressBar::new(test_count as u64);
 	for ref in_path in recursive_find_tests(testdir) {
         let out_path = in_path.with_extension("out");
 
@@ -82,11 +101,12 @@ fn run_test(args: &clap::ArgMatches, checker: Box<Checker>) {
 
         if correct {
             if print_success {
-                println!("{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
+                pb_interwrite!(pb, "{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
             }
         } else {
-            println!("{} {}", "TEST RUN FAILURE".red().bold(), in_path.display());
+            pb_interwrite!(pb, "{} {}", "TEST RUN FAILURE".red().bold(), in_path.display());
         }
+		pb.inc();
     }
 }
 
