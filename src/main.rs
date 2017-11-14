@@ -103,11 +103,10 @@ fn run_test(args: &clap::ArgMatches, checker: Box<Checker>) {
             if print_success {
                 pb_interwrite!(pb, "{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
             }
-            pb.inc1();
         } else {
             pb_interwrite!(pb, "{} {}", "TEST RUN FAILURE".red().bold(), in_path.display());
-            pb.inc2();
         }
+		pb.inc();
     }
 }
 
