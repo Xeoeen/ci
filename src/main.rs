@@ -95,17 +95,20 @@ fn run_test(args: &clap::ArgMatches, checker: Box<Checker>) {
             .stdout(std::process::Stdio::piped())
             .spawn().unwrap();
         let result = kid.wait_with_output().unwrap();
-        let output_kid = String::from_utf8(result.stdout).unwrap();
+		if result.status.success() {
+			let output_kid = String::from_utf8(result.stdout).unwrap();
+	        let correct = checker.check(in_path, &out_path, &output_kid);
 
-        let correct = checker.check(in_path, &out_path, &output_kid);
-
-        if correct {
-            if print_success {
-                pb_interwrite!(pb, "{} {}", "TEST RUN SUCCESS".green().bold(), in_path.display());
-            }
-        } else {
-            pb_interwrite!(pb, "{} {}", "TEST RUN FAILURE".red().bold(), in_path.display());
-        }
+	        if correct {
+	            if print_success {
+	                pb_interwrite!(pb, "{:13} {}", "ACCEPT".green().bold(), in_path.display());
+	            }
+	        } else {
+	            pb_interwrite!(pb, "{:13} {}", "WRONG ANSWER".red().bold(), in_path.display());
+	        }
+		} else {
+			pb_interwrite!(pb, "{:13} {}", "RUNTIME ERROR".red().bold(), in_path.display());
+		}
 		pb.inc();
     }
 }
