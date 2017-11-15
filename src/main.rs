@@ -81,6 +81,13 @@ fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>
 		.filter(|path| path.extension().map(|ext| ext == "in").unwrap_or(false)))
 }
 
+fn timefn<T, F: FnOnce() -> T>(f: F) -> (T, std::time::Duration) {
+	let inst = std::time::Instant::now();
+	let x = f();
+	let t = inst.elapsed();
+	(x, t)
+}
+
 fn run_test(args: &clap::ArgMatches, checker: Box<Checker>) {
     let exec = args.value_of("exec").unwrap();
     let testdir = Path::new(args.value_of("testdir").unwrap());
@@ -94,20 +101,21 @@ fn run_test(args: &clap::ArgMatches, checker: Box<Checker>) {
             .stdin(std::fs::File::open(in_path).unwrap())
             .stdout(std::process::Stdio::piped())
             .spawn().unwrap();
-        let result = kid.wait_with_output().unwrap();
+        let (result, timing) = timefn(move || kid.wait_with_output().unwrap());
+		let timestr = format!("{}.{:02}s", timing.as_secs(), timing.subsec_nanos() / 10000000).blue().bold();
 		if result.status.success() {
 			let output_kid = String::from_utf8(result.stdout).unwrap();
 	        let correct = checker.check(in_path, &out_path, &output_kid);
 
 	        if correct {
 	            if print_success {
-	                pb_interwrite!(pb, "{:13} {}", "ACCEPT".green().bold(), in_path.display());
+	                pb_interwrite!(pb, "{:13} {} {}", "ACCEPT".green().bold(), timestr, in_path.display());
 	            }
 	        } else {
-	            pb_interwrite!(pb, "{:13} {}", "WRONG ANSWER".red().bold(), in_path.display());
+	            pb_interwrite!(pb, "{:13} {} {}", "WRONG ANSWER".red().bold(), timestr, in_path.display());
 	        }
 		} else {
-			pb_interwrite!(pb, "{:13} {}", "RUNTIME ERROR".red().bold(), in_path.display());
+			pb_interwrite!(pb, "{:13} {} {}", "RUNTIME ERROR".red().bold(), timestr, in_path.display());
 		}
 		pb.inc();
     }
