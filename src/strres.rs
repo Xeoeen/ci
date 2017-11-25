@@ -7,6 +7,7 @@ pub enum StrRes {
 	InMemory(String),
 	FileHandle(File),
 	FilePath(PathBuf),
+	Empty,
 }
 
 impl StrRes {
@@ -23,11 +24,13 @@ impl StrRes {
 				let file = File::open(path).unwrap();
 				StrRes::FileHandle(file).get_string()
 			},
+			StrRes::Empty => "".to_owned(),
 		}
 	}
 	pub fn with_filename<T, F: FnOnce(&Path) -> T>(&self, f: F) -> T {
 		match self {
 			&StrRes::FilePath(ref path) => f(path),
+			&StrRes::Empty => f(Path::new("/dev/null")),
 			_ => unimplemented!("StrRes::with_filename"),
 		}
 	}
@@ -35,12 +38,14 @@ impl StrRes {
 		match self {
 			&StrRes::InMemory(ref s) => StrRes::InMemory(s.clone()),
 			&StrRes::FilePath(ref path) => StrRes::FilePath(path.clone()),
+			&StrRes::Empty => StrRes::Empty,
 			_ => unimplemented!("StrRes::clone"),
 		}
 	}
 	pub fn print_to_stdout(&self) {
 		match self {
 			&StrRes::InMemory(ref s) => print!("{}", s),
+			&StrRes::Empty => (),
 			_ => unimplemented!("StrRes::print_to_stdout"),
 		}
 	}
@@ -52,6 +57,7 @@ pub fn exec(executable: &Path, input: StrRes) -> StrRes {
 		StrRes::InMemory(s) => (Stdio::piped(), Some(s)),
 		StrRes::FileHandle(file) => (Stdio::from(file), None),
 		StrRes::FilePath(path) => (Stdio::from(File::open(path).unwrap()), None),
+		StrRes::Empty => (Stdio::null(), None),
 	};
 	let mut kid = Command::new(executable)
 		.stdin(stdin_settings)
