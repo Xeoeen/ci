@@ -31,6 +31,19 @@ impl StrRes {
 			_ => unimplemented!("StrRes::with_filename"),
 		}
 	}
+	pub fn clone(&self) -> StrRes {
+		match self {
+			&StrRes::InMemory(ref s) => StrRes::InMemory(s.clone()),
+			&StrRes::FilePath(ref path) => StrRes::FilePath(path.clone()),
+			_ => unimplemented!("StrRes::clone"),
+		}
+	}
+	pub fn print_to_stdout(&self) {
+		match self {
+			&StrRes::InMemory(ref s) => print!("{}", s),
+			_ => unimplemented!("StrRes::print_to_stdout"),
+		}
+	}
 
 }
 
