@@ -6,28 +6,15 @@ extern crate colored;
 extern crate tempfile;
 extern crate pbr;
 
+mod checkers;
 mod strres;
+#[macro_use] mod ui;
 
 use std::path::{Path};
 use std::io::{Write};
 use colored::*;
+use checkers::*;
 use strres::{StrRes, exec};
-
-macro_rules! pb_interwrite {
-	($pb:expr, $fmt:expr) => {
-		std::io::stdout().write(format!("\r\x1B[K{}\n", $fmt).as_bytes()).unwrap();
-		std::io::stdout().flush().unwrap();
-		$pb.tick();
-	};
-	($pb:expr, $fmt:expr $(,$arg:expr)*) => {
-		{
-			let msg = format!($fmt $(,$arg)*);
-			std::io::stdout().write(format!("\r\x1B[K{}\n", msg).as_bytes()).unwrap();
-			std::io::stdout().flush().unwrap();
-			$pb.tick();
-		}
-	};
-}
 
 fn compile_cpp(source: &Path, output: &Path, release: bool) {
     let mut args = vec!["-std=c++11", "-Wall", "-Wextra"];
@@ -50,28 +37,6 @@ fn run_build(source: &Path, release: bool) {
     assert!(source.extension().unwrap() == "cpp");
     let executable = source.with_extension("e");
     compile_cpp(source, &executable, release);
-}
-
-fn equal_bew(a: &str, b: &str) -> bool {
-    let mut i = a.chars().peekable();
-    let mut j = b.chars().peekable();
-    while i.peek().is_some() && j.peek().is_some() {
-        if i.peek().unwrap().is_whitespace() && j.peek().unwrap().is_whitespace() {
-            while i.peek().map(|c| c.is_whitespace()).unwrap_or(false) {
-                i.next();
-            }
-            while j.peek().map(|c| c.is_whitespace()).unwrap_or(false) {
-                j.next();
-            }
-        } else {
-            if i.peek() != j.peek() {
-                return false;
-            }
-            i.next();
-            j.next();
-        }
-    }
-    return i.peek().is_none() && j.peek().is_none();
 }
 
 fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>> {
@@ -136,17 +101,6 @@ fn run_test(executable: &Path, testdir: &Path, print_success: bool, checker: &Ch
     }
 }
 
-macro_rules! print_flush {
-	($fmt:expr) => {
-		print!($fmt);
-		std::io::stdout().flush().unwrap();
-	};
-	($fmt:expr $(,$arg:expr)*) => {
-		print!($fmt $(,$arg)*);
-		std::io::stdout().flush().unwrap();
-	};
-}
-
 fn run_multitest(gen: &Path, execs: &[&Path], checker: Box<Checker>) {
 	let mut i = 1;
 	loop {
@@ -175,33 +129,6 @@ fn run_multitest(gen: &Path, execs: &[&Path], checker: Box<Checker>) {
 			break
 		}
 		i += 1;
-	}
-}
-
-trait Checker {
-	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> bool;
-}
-struct CheckerDiffOut;
-impl Checker for CheckerDiffOut {
-	fn check(&self, _input: StrRes, my_output: StrRes, perfect_output: StrRes) -> bool {
-		equal_bew(&my_output.get_string(), &perfect_output.get_string())
-	}
-}
-struct CheckerApp {
-	app: String,
-}
-impl Checker for CheckerApp {
-	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> bool {
-		input.with_filename(|i_path| {
-			my_output.with_filename(|mo_path| {
-				perfect_output.with_filename(|po_path| {
-					std::process::Command::new(&self.app)
-								.args(&[i_path, mo_path, po_path])
-								.status().unwrap()
-								.success()
-				})
-			})
-		})
 	}
 }
 
