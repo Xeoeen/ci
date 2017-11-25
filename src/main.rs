@@ -6,9 +6,12 @@ extern crate colored;
 extern crate tempfile;
 extern crate pbr;
 
+mod strres;
+
 use std::path::{Path};
-use std::io::{Read, Write};
+use std::io::{Write};
 use colored::*;
+use strres::{StrRes, exec};
 
 macro_rules! pb_interwrite {
 	($pb:expr, $fmt:expr) => {
@@ -88,63 +91,62 @@ fn timefn<T, F: FnOnce() -> T>(f: F) -> (T, std::time::Duration) {
 	(x, t)
 }
 
+fn timefmt(t: std::time::Duration) -> String {
+	format!("{}.{:02}s", t.as_secs(), t.subsec_nanos() / 10000000)
+}
+
 fn run_test(args: &clap::ArgMatches, checker: Box<Checker>) {
-    let exec = args.value_of("exec").unwrap();
+    let executable = Path::new(args.value_of("exec").unwrap());
     let testdir = Path::new(args.value_of("testdir").unwrap());
     let print_success = !args.is_present("no-print-success");
 	let test_count = recursive_find_tests(testdir).count();
 	let mut pb = pbr::ProgressBar::new(test_count as u64);
 	for ref in_path in recursive_find_tests(testdir) {
         let out_path = in_path.with_extension("out");
-
-        let kid = std::process::Command::new(exec)
-            .stdin(std::fs::File::open(in_path).unwrap())
-            .stdout(std::process::Stdio::piped())
-            .spawn().unwrap();
-        let (result, timing) = timefn(move || kid.wait_with_output().unwrap());
-		let timestr = format!("{}.{:02}s", timing.as_secs(), timing.subsec_nanos() / 10000000).blue().bold();
-		if result.status.success() {
-			let output_kid = String::from_utf8(result.stdout).unwrap();
-	        let correct = checker.check(in_path, &out_path, &output_kid);
-
-	        if correct {
-	            if print_success {
-	                pb_interwrite!(pb, "{:13} {} {}", "ACCEPT".green().bold(), timestr, in_path.display());
-	            }
-	        } else {
-	            pb_interwrite!(pb, "{:13} {} {}", "WRONG ANSWER".red().bold(), timestr, in_path.display());
-	        }
+		let (kid_out, timing) = timefn(move || {
+			exec(executable, StrRes::FilePath(std::path::PathBuf::from(in_path)))
+		});
+		let timestr = timefmt(timing).blue().bold();
+		let correct = checker.check(
+			StrRes::FilePath(std::path::PathBuf::from(in_path)),
+			StrRes::FilePath(std::path::PathBuf::from(&out_path)),
+			kid_out,
+		);
+		if correct {
+			if print_success {
+				pb_interwrite!(pb, "{:13} {} {}", "ACCEPT".green().bold(), timestr, in_path.display());
+			}
 		} else {
-			pb_interwrite!(pb, "{:13} {} {}", "RUNTIME ERROR".red().bold(), timestr, in_path.display());
+			pb_interwrite!(pb, "{:13} {} {}", "WRONG ANSWER".red().bold(), timestr, in_path.display());
 		}
 		pb.inc();
     }
 }
 
 trait Checker {
-	fn check(&self, in_path: &Path, out_path: &Path, mine_str: &str) -> bool;
+	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> bool;
 }
 struct CheckerDiffOut;
 impl Checker for CheckerDiffOut {
-	fn check(&self, _in_path: &Path, out_path: &Path, mine_str: &str) -> bool {
-		let mut out_file = std::fs::File::open(out_path).unwrap();
-		let mut out_str = String::new();
-		out_file.read_to_string(&mut out_str).unwrap();
-		equal_bew(mine_str, &out_str)
+	fn check(&self, _input: StrRes, my_output: StrRes, perfect_output: StrRes) -> bool {
+		equal_bew(&my_output.get_string(), &perfect_output.get_string())
 	}
 }
 struct CheckerApp {
 	app: String,
 }
 impl Checker for CheckerApp {
-	fn check(&self, in_path: &Path, out_path: &Path, mine_str: &str) -> bool {
-		let mut mine_file = tempfile::NamedTempFile::new().unwrap();
-		write!(mine_file, "{}", mine_str).unwrap();
-		let mine_path = mine_file.path();
-		std::process::Command::new(&self.app)
-			.args(&[in_path, mine_path, out_path])
-			.status().unwrap()
-			.success()
+	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> bool {
+		input.with_filename(|i_path| {
+			my_output.with_filename(|mo_path| {
+				perfect_output.with_filename(|po_path| {
+					std::process::Command::new(&self.app)
+								.args(&[i_path, mo_path, po_path])
+								.status().unwrap()
+								.success()
+				})
+			})
+		})
 	}
 }
 
