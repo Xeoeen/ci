@@ -12,6 +12,10 @@ pub enum StrRes {
 
 impl StrRes {
 
+	pub fn from_path(path: &Path) -> StrRes {
+		StrRes::FilePath(path.to_owned())
+	}
+
 	pub fn get_string(self) -> String {
 		match self {
 			StrRes::InMemory(s) => s,
