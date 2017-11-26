@@ -2,9 +2,11 @@
 name = "ci"
 version = "0.1.0"
 authors = ["Mateusz Cegiełka <mateusz@cegla.net>"]
+description = "CLI for building and testing programming contest tasks"
 
 [dependencies]
-clap = "2.26.2"
+structopt = "0.1"
+structopt-derive = "0.1"
 walkdir = "2"
 colored = "1.5.3"
 tempfile = "*"
