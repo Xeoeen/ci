@@ -137,11 +137,24 @@ fn run_multitest(args: Args) {
 	}
 }
 
+fn run_genbashauto(args: Args) {
+	if let Args::InternalAutocomplete { shell } = args {
+		Args::clap().gen_completions_to("ci", shell, &mut std::io::stdout());
+	}
+}
+
 fn parse_checker(s: &str) -> Result<Box<Checker>, i32> {
 	if s == "\0CheckerDiffOut" {
 		Ok(Box::new(checkers::CheckerDiffOut {}))
 	} else {
 		Ok(Box::new(checkers::CheckerApp { app: s.to_owned() }))
+	}
+}
+fn parse_shell(s: &str) -> Result<structopt::clap::Shell, i32> {
+	if s == "bash" {
+		Ok(structopt::clap::Shell::Bash)
+	} else {
+		Err(0)
 	}
 }
 
@@ -172,8 +185,13 @@ enum Args {
 		gen: PathBuf,
 		#[structopt(name = "EXECUTABLES", parse(from_os_str))]
 		executables: Vec<PathBuf>,
-		#[structopt(long = "checker", parse(try_from_str = "parse_checker"))]
+		#[structopt(long = "checker", parse(try_from_str = "parse_checker"), default_value = "\0CheckerDiffOut")]
 		checker: Box<Checker>,
+	},
+	#[structopt(name = "internal-autocomplete")]
+	InternalAutocomplete {
+		#[structopt(name = "SHELL", parse(try_from_str = "parse_shell"))]
+		shell: structopt::clap::Shell,
 	},
 }
 
@@ -183,5 +201,6 @@ fn main() {
 		Args::Build { .. } => run_build(args),
 		Args::Test { .. } => run_test(args),
 		Args::Multitest { .. } => run_multitest(args),
+		Args::InternalAutocomplete { .. } => run_genbashauto(args),
 	}
 }
