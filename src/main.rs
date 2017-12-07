@@ -60,6 +60,19 @@ fn timefmt(t: std::time::Duration) -> String {
 	format!("{}.{:02}s", t.as_secs(), t.subsec_nanos() / 10000000)
 }
 
+fn diagnose_app(app: &Path) {
+	if app.extension().map(|ext| ext == "e").unwrap_or(false) && app.with_extension("cpp").exists() {
+		let srcfile = app.with_extension("cpp");
+		let meta_app = std::fs::metadata(app).unwrap();
+		let meta_src = std::fs::metadata(srcfile).unwrap();
+		if meta_src.modified().unwrap() > meta_app.modified().unwrap() {
+			eprint!("{} .e is folder than corresponding .cpp file ({}). Continue?", "WARNING".red().bold(), app.display());
+			std::io::stderr().flush().unwrap();
+			std::io::stdin().read_line(&mut String::new()).unwrap();
+		}
+	}
+}
+
 #[derive(PartialEq, Eq)]
 enum TestResult {
 	Accept,
@@ -90,6 +103,7 @@ fn test_single(executable: &Path, input: StrRes, perfect_output: StrRes, checker
 
 fn run_test(args: Args) {
 	if let Args::Test { executable, testdir, no_print_success, checker } = args {
+		diagnose_app(&executable);
 		let test_count = recursive_find_tests(&testdir).count();
 		let mut pb = pbr::ProgressBar::new(test_count as u64);
 		for ref in_path in recursive_find_tests(&testdir) {
@@ -107,6 +121,9 @@ fn run_test(args: Args) {
 
 fn run_multitest(args: Args) {
 	if let Args::Multitest { gen, executables, checker } = args {
+		for ref executable in &executables {
+			diagnose_app(executable);
+		}
 		let mut i = 1;
 		loop {
 			let test_str = exec(&gen, StrRes::Empty);
