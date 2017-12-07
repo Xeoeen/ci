@@ -1,5 +1,3 @@
-#![feature(io)]
-
 extern crate structopt;
 #[macro_use] extern crate structopt_derive;
 extern crate walkdir;
