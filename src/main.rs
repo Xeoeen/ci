@@ -66,7 +66,7 @@ fn diagnose_app(app: &Path) {
 		let meta_app = std::fs::metadata(app).unwrap();
 		let meta_src = std::fs::metadata(srcfile).unwrap();
 		if meta_src.modified().unwrap() > meta_app.modified().unwrap() {
-			eprint!("{} .e is folder than corresponding .cpp file ({}). Continue?", "WARNING".red().bold(), app.display());
+			eprint!("{} .e is older than corresponding .cpp file ({}). Continue?", "WARNING".red().bold(), app.display());
 			std::io::stderr().flush().unwrap();
 			std::io::stdin().read_line(&mut String::new()).unwrap();
 		}
