@@ -2,6 +2,7 @@ use std::fs::{File};
 use std::path::{Path, PathBuf};
 use std::io::{Read, Write};
 use std::process::{Command, Stdio};
+use tempfile::{NamedTempFile};
 
 pub enum StrRes {
 	InMemory(String),
@@ -34,6 +35,11 @@ impl StrRes {
 	pub fn with_filename<T, F: FnOnce(&Path) -> T>(&self, f: F) -> T {
 		match self {
 			&StrRes::FilePath(ref path) => f(path),
+			&StrRes::InMemory(ref s) => {
+				let mut tmp = NamedTempFile::new().unwrap();
+				write!(tmp, "{}", s).unwrap();
+				f(tmp.path())
+			},
 			&StrRes::Empty => f(Path::new("/dev/null")),
 			_ => unimplemented!("StrRes::with_filename"),
 		}
