@@ -62,7 +62,11 @@ impl StrRes {
 
 }
 
-pub fn exec(executable: &Path, input: StrRes) -> StrRes {
+#[derive(Debug)]
+pub enum ExecE {
+	NonZeroStatus,
+}
+pub fn exec(executable: &Path, input: StrRes) -> Result<StrRes, ExecE> {
 	let (stdin_settings, to_write) = match input {
 		StrRes::InMemory(s) => (Stdio::piped(), Some(s)),
 		StrRes::FileHandle(file) => (Stdio::from(file), None),
@@ -78,7 +82,9 @@ pub fn exec(executable: &Path, input: StrRes) -> StrRes {
 		kid.stdin.as_mut().unwrap().write_all(piped_input.as_bytes()).unwrap();
 	}
 	let out = kid.wait_with_output().unwrap();
-	assert!(out.status.success());
+	if !out.status.success() {
+		return Err(ExecE::NonZeroStatus);
+	}
 	let out_str = String::from_utf8(out.stdout).unwrap();
-	StrRes::InMemory(out_str)
+	Ok(StrRes::InMemory(out_str))
 }
