@@ -17,7 +17,7 @@ use strres::{StrRes, exec};
 use structopt::StructOpt;
 
 fn compile_cpp(source: &Path, output: &Path, release: bool) {
-    let mut args = vec!["-std=c++11", "-Wall", "-Wextra"];
+    let mut args = vec!["-std=c++11", "-Wall", "-Wextra", "-Wconversion", "-Wno-sign-conversion"];
     if release {
         args.push("-O2");
     } else {
@@ -26,7 +26,7 @@ fn compile_cpp(source: &Path, output: &Path, release: bool) {
     args.push(source.to_str().unwrap());
     args.push("-o");
     args.push(output.to_str().unwrap());
-    let mut kid = std::process::Command::new("c++")
+    let mut kid = std::process::Command::new("clang++")
         .args(&args)
         .stderr(std::process::Stdio::inherit())
         .spawn().unwrap();
