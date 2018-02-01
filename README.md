@@ -20,7 +20,7 @@ ci internal-autocomplete bash | sudo tee /usr/share/bash-completion/completions/
 ```bash
 ci build kitties.cpp
 ```
-Compiles `kitties.cpp` to `./kitties.e`. The code is built by compiler `c++`(possibly will change to always use clang) with C++11(`-std=c++11`) and warnings enabled(`-Wall` `-Wextra`) This is the debug build, which includes debugging info(`-g`) and enables C++ standard library debug configuration (`-D_GLIBCXX_DEBUG`), which means that you can debug it and also it will crash on using standard library incorrectly, instead of doing UB.
+Compiles `kitties.cpp` to `./kitties.e`. The code is built by compiler `clang++` with C++11(`-std=c++11`) and warnings enabled(`-Wall` `-Wextra` `-Wconversion` `-Wno-sign-conversion`). This is the debug build, which includes debugging info(`-g`) and enables C++ standard library debug configuration (`-D_GLIBCXX_DEBUG`) as well as UB sanitizer(`-fno-sanitize-recover=undefined`), which means that you can debug it and also it will crash on UB.
 
 ```bash
 ci build --release kitties.cpp

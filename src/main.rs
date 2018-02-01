@@ -21,7 +21,7 @@ fn compile_cpp(source: &Path, output: &Path, release: bool) {
     if release {
         args.push("-O2");
     } else {
-        args.extend_from_slice(&["-g", "-D_GLIBCXX_DEBUG"]);
+        args.extend_from_slice(&["-g", "-D_GLIBCXX_DEBUG", "-fno-sanitize-recover=undefined"]);
     }
     args.push(source.to_str().unwrap());
     args.push("-o");
