@@ -173,6 +173,17 @@ fn run_genbashauto(args: Args) {
 	}
 }
 
+fn run_vendor(args: Args) {
+	if let Args::Vendor { source } = args {
+		println!("#include <bits/stdc++.h>");
+		std::process::Command::new("g++")
+			.args(&["-I", "/usr/share/ci/dummy-includes", "-E", source.as_path().to_str().unwrap()])
+			.stdout(std::process::Stdio::inherit())
+			.spawn().unwrap()
+			.wait().unwrap();
+	}
+}
+
 fn parse_checker(s: &str) -> Result<Box<Checker>, i32> {
 	if s == "\0CheckerDiffOut" {
 		Ok(Box::new(checkers::CheckerDiffOut {}))
@@ -218,6 +229,11 @@ enum Args {
 		#[structopt(long = "checker", parse(try_from_str = "parse_checker"), default_value = "\0CheckerDiffOut")]
 		checker: Box<Checker>,
 	},
+	#[structopt(name = "vendor")]
+	Vendor {
+		#[structopt(name = "SOURCE", parse(from_os_str))]
+		source: PathBuf,
+	},
 	#[structopt(name = "internal-autocomplete")]
 	InternalAutocomplete {
 		#[structopt(name = "SHELL", parse(try_from_str = "parse_shell"))]
@@ -231,6 +247,7 @@ fn main() {
 		Args::Build { .. } => run_build(args),
 		Args::Test { .. } => run_test(args),
 		Args::Multitest { .. } => run_multitest(args),
+		Args::Vendor { .. } => run_vendor(args),
 		Args::InternalAutocomplete { .. } => run_genbashauto(args),
 	}
 }

@@ -55,3 +55,12 @@ Instead of using already generated tests, this uses `./kitties-gen.py` to genera
 ci multitest ./kitties-gen.py ./kitties-brut.e ./kitties.e ./kitties-alternative.e --checker ./kitties-checker.e
 ```
 Instead of comparing char-by-char minus whitespace, this uses a checker like `--checker` in `ci test` does.
+
+### `ci vendor`
+
+```bash
+ci vendor kitties.cpp
+```
+When running your code in testing environments, you will not have access to various helpful header-only libraries like your personal algorithm collections, [mc](https://github.com/matcegla/mc) or [Boost.Graph](http://www.boost.org/doc/libs/1_66_0/libs/graph/doc/table_of_contents.html). This command will only run the preprocessor, copy-pasting these libraries into your code so you can send it to an online judge system.
+
+To use the command, a directory `/usr/share/ci/dummy-includes` must be created, with all the includes you do not want copy-pasted(like `<iostream>`). To do this, create a file in this directory, like `sudo touch /usr/share/ci/dummy-includes/iostream`.
