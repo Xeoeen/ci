@@ -1,5 +1,4 @@
-extern crate structopt;
-#[macro_use] extern crate structopt_derive;
+#[macro_use] extern crate structopt;
 extern crate walkdir;
 extern crate colored;
 extern crate tempfile;
