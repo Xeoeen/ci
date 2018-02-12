@@ -6,7 +6,7 @@ description = "CLI for building and testing programming contest tasks"
 
 [dependencies]
 structopt = "0.2"
-walkdir = "2"
-colored = "1.5.3"
-tempfile = "*"
-pbr = "1.0.0"
+walkdir = "2.1"
+colored = "1.5"
+tempfile = "2.2"
+pbr = "1.0"
