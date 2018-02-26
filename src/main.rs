@@ -15,8 +15,23 @@ use checkers::*;
 use strres::{StrRes, exec};
 use structopt::StructOpt;
 
-fn compile_cpp(source: &Path, output: &Path, release: bool) {
-    let mut args = vec!["-std=c++11", "-Wall", "-Wextra", "-Wconversion", "-Wno-sign-conversion"];
+enum CppVer {
+	Cpp11,
+	Cpp17,
+}
+impl CppVer {
+	fn flag(&self) -> &'static str {
+		match self {
+			&CppVer::Cpp11 => "-std=c++11",
+			&CppVer::Cpp17 => "-std=c++17",
+		}
+	}
+}
+
+fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) {
+    let mut args = vec![];
+	args.push(cppver.flag());
+	args.extend_from_slice(&["-Wall", "-Wextra", "-Wconversion", "-Wno-sign-conversion"]);
     if release {
         args.push("-O2");
     } else {
@@ -33,10 +48,10 @@ fn compile_cpp(source: &Path, output: &Path, release: bool) {
 }
 
 fn run_build(args: Args) {
-	if let Args::Build { source, release } = args {
+	if let Args::Build { source, release, standard } = args {
 		assert!(source.extension().unwrap() == "cpp");
 		let executable = source.with_extension("e");
-		compile_cpp(&source, &executable, release);
+		compile_cpp(&source, &executable, release, standard);
 	}
 }
 
@@ -197,6 +212,15 @@ fn parse_shell(s: &str) -> Result<structopt::clap::Shell, i32> {
 		Err(0)
 	}
 }
+fn parse_standard(s: &str) -> Result<CppVer, i32> {
+	if s == "17" {
+		Ok(CppVer::Cpp17)
+	} else if s == "11" {
+		Ok(CppVer::Cpp11)
+	} else {
+		Err(0)
+	}
+}
 
 #[derive(StructOpt)]
 #[structopt(name = "ci", about = "CLI for building and testing programming contest tasks")]
@@ -207,6 +231,8 @@ enum Args {
 		source: PathBuf,
 		#[structopt(short = "O", long = "release")]
 		release: bool,
+		#[structopt(long = "standard", parse(try_from_str = "parse_standard"), default_value = "17")]
+		standard: CppVer,
 	},
 	#[structopt(name = "test")]
 	Test {

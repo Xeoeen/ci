@@ -20,12 +20,19 @@ ci internal-autocomplete bash | sudo tee /usr/share/bash-completion/completions/
 ```bash
 ci build kitties.cpp
 ```
-Compiles `kitties.cpp` to `./kitties.e`. The code is built by compiler `clang++` with C++11(`-std=c++11`) and warnings enabled(`-Wall` `-Wextra` `-Wconversion` `-Wno-sign-conversion`). This is the debug build, which includes debugging info(`-g`) and enables C++ standard library debug configuration (`-D_GLIBCXX_DEBUG`) as well as UB sanitizer(`-fno-sanitize-recover=undefined`), which means that you can debug it and also it will crash on UB.
+Compiles `kitties.cpp` to `./kitties.e`. The code is built by compiler `clang++` with C++17(`-std=c++17`) and warnings enabled(`-Wall` `-Wextra` `-Wconversion` `-Wno-sign-conversion`). This is the debug build, which includes debugging info(`-g`) and enables C++ standard library debug configuration (`-D_GLIBCXX_DEBUG`) as well as UB sanitizer(`-fno-sanitize-recover=undefined`), which means that you can debug it and also it will crash on UB.
 
 ```bash
 ci build --release kitties.cpp
 ```
 Compiles `kitties.c` to `./kitties.e`. The `--release` flag changes the debug build to release build, which enables optimisations(`-O2`).
+
+```bash
+ci build --standard 11
+```
+Compiles with C++11 instead of default(C++17), with the flag `-std=c++11`. Possible values are:
+`11`(`-std=c++11`),
+`17`(`-std=c++17`).
 
 ### `ci test`
 
