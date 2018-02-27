@@ -44,7 +44,7 @@ fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) {
         .args(&args)
         .stderr(std::process::Stdio::inherit())
         .spawn().unwrap();
-    kid.wait().unwrap();
+    assert!(kid.wait().unwrap().success());
 }
 
 fn run_build(args: Args) {
