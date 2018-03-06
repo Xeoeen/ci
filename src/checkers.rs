@@ -49,5 +49,15 @@ fn equal_bew(a: &str, b: &str) -> bool {
 			j.next();
 		}
 	}
-	return i.peek().is_none() && j.peek().is_none();
+	while let Some(c) = i.next() {
+		if !c.is_whitespace() {
+			return false;
+		}
+	}
+	while let Some(c) = j.next() {
+		if !c.is_whitespace() {
+			return false;
+		}
+	}
+	true
 }
