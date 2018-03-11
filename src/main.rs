@@ -3,6 +3,7 @@ extern crate walkdir;
 extern crate colored;
 extern crate tempfile;
 extern crate pbr;
+extern crate itertools;
 
 mod checkers;
 mod strres;
@@ -14,6 +15,8 @@ use colored::*;
 use checkers::*;
 use strres::{StrRes, exec};
 use structopt::StructOpt;
+use std::cmp::Ordering;
+use itertools::Itertools;
 
 enum CppVer {
 	Cpp11,
@@ -55,12 +58,36 @@ fn run_build(args: Args) {
 	}
 }
 
+fn ord_by_test_number(lhs: &std::path::PathBuf, rhs: &std::path::PathBuf) -> Ordering {
+	for grp in lhs.to_str().unwrap().chars().group_by(|c| c.is_numeric()).into_iter().zip_longest(rhs.to_str().unwrap().chars().group_by(|c| c.is_numeric()).into_iter()) {
+		match grp {
+			itertools::EitherOrBoth::Both((isdig, lgrp), (_, rgrp)) => {
+				let grp_compr = if isdig {
+					let lnum: i64 = lgrp.collect::<String>().parse().unwrap();
+					let rnum: i64 = rgrp.collect::<String>().parse().unwrap();
+					lnum.cmp(&rnum)
+				} else {
+					lgrp.cmp(rgrp)
+				};
+				if grp_compr != Ordering::Equal {
+					return grp_compr;
+				}
+			},
+			itertools::EitherOrBoth::Left(_) => return Ordering::Greater,
+			itertools::EitherOrBoth::Right(_) => return Ordering::Less,
+		}
+	}
+	Ordering::Equal
+}
+
 fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>> {
-	Box::new(walkdir::WalkDir::new(testdir).follow_links(true)
+	let mut tests: Vec<_> = walkdir::WalkDir::new(testdir).follow_links(true)
 		.into_iter()
 		.filter_map(|e| e.ok())
 		.map(|entry| entry.path().to_path_buf())
-		.filter(|path| path.extension().map(|ext| ext == "in").unwrap_or(false)))
+		.filter(|path| path.extension().map(|ext| ext == "in").unwrap_or(false)).collect();
+	tests.sort_by(ord_by_test_number);
+	Box::new(tests.into_iter())
 }
 
 fn timefn<T, F: FnOnce() -> T>(f: F) -> (T, std::time::Duration) {
