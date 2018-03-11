@@ -14,6 +14,7 @@ use colored::*;
 use checkers::*;
 use strres::{StrRes, exec};
 use structopt::StructOpt;
+use std::cmp::Ordering;
 
 enum CppVer {
 	Cpp11,
@@ -55,12 +56,25 @@ fn run_build(args: Args) {
 	}
 }
 
+fn ord_by_test_number(lhs: &std::path::PathBuf, rhs: &std::path::PathBuf) -> Ordering {
+	let lhs_parent = lhs.parent().unwrap();
+	let rhs_parent = rhs.parent().unwrap();
+	if lhs_parent != rhs_parent {
+		return lhs_parent.cmp(rhs_parent);
+	}
+	let lhs_filename = lhs.file_name().unwrap();
+	let rhs_filename = rhs.file_name().unwrap();
+	(lhs_filename.len(), lhs_filename).cmp(&(rhs_filename.len(), rhs_filename))
+}
+
 fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>> {
-	Box::new(walkdir::WalkDir::new(testdir).follow_links(true)
+	let mut tests: Vec<_> = walkdir::WalkDir::new(testdir).follow_links(true)
 		.into_iter()
 		.filter_map(|e| e.ok())
 		.map(|entry| entry.path().to_path_buf())
-		.filter(|path| path.extension().map(|ext| ext == "in").unwrap_or(false)))
+		.filter(|path| path.extension().map(|ext| ext == "in").unwrap_or(false)).collect();
+	tests.sort_by(ord_by_test_number);
+	Box::new(tests.into_iter())
 }
 
 fn timefn<T, F: FnOnce() -> T>(f: F) -> (T, std::time::Duration) {
