@@ -1,4 +1,11 @@
-use super::super::*;
+use Args;
+use diagnose::diagnose_app;
+use strres::{exec, StrRes};
+use testing::{test_single, TestResult};
+use ui::timefmt;
+use util::timefn;
+use std::path::Path;
+use colored::*;
 
 pub fn run(args: Args) {
 	if let Args::Multitest { gen, executables, checker } = args {

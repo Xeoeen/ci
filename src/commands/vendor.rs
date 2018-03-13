@@ -1,4 +1,5 @@
-use super::super::*;
+use Args;
+use std;
 
 pub fn run(args: Args) {
 	if let Args::Vendor { source } = args {

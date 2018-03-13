@@ -1,4 +1,6 @@
-use super::super::*;
+use Args;
+use std;
+use structopt::StructOpt;
 
 pub fn run(args: Args) {
 	if let Args::InternalAutocomplete { shell } = args {

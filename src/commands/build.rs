@@ -1,4 +1,19 @@
-use super::super::*;
+use Args;
+use std;
+use std::path::Path;
+
+pub enum CppVer {
+	Cpp11,
+	Cpp17,
+}
+impl CppVer {
+	fn flag(&self) -> &'static str {
+		match self {
+			&CppVer::Cpp11 => "-std=c++11",
+			&CppVer::Cpp17 => "-std=c++17",
+		}
+	}
+}
 
 fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) {
     let mut args = vec![];
