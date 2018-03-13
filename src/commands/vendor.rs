@@ -1,4 +1,4 @@
-use Args;
+use cli::Args;
 use std;
 
 pub fn run(args: Args) {

@@ -1,4 +1,4 @@
-use Args;
+use cli::Args;
 use std;
 use std::path::Path;
 
