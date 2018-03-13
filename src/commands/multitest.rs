@@ -1,4 +1,4 @@
-use Args;
+use cli::Args;
 use diagnose::diagnose_app;
 use strres::{exec, StrRes};
 use testing::{test_single, TestResult};

@@ -1,4 +1,4 @@
-use Args;
+use cli::Args;
 use diagnose::diagnose_app;
 use strres::StrRes;
 use ui::timefmt;
