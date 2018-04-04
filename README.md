@@ -63,6 +63,11 @@ ci multitest ./kitties-gen.py ./kitties-brut.e ./kitties.e ./kitties-alternative
 ```
 Instead of comparing char-by-char minus whitespace, this uses a checker like `--checker` in `ci test` does.
 
+```bash
+ci multitest ./kitties-gen.py ./kitties-brut.e ./kitties.e ./kitties-alternative.e -n 200
+```
+Instead of breaking on first failing test, this will run 200 tests and only print one with greatest fitness. Fitness function is hardcoded to be `- (test char count)` (customizable fitness to be added).
+
 ### `ci vendor`
 
 ```bash

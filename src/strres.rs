@@ -17,19 +17,20 @@ impl StrRes {
 		StrRes::FilePath(path.to_owned())
 	}
 
-	pub fn get_string(self) -> String {
+	pub fn get_string(&self) -> String {
 		match self {
-			StrRes::InMemory(s) => s,
-			StrRes::FileHandle(mut file) => {
+			&StrRes::InMemory(ref s) => s.clone(),
+			&StrRes::FileHandle(ref file) => {
+				let mut f2 = file.clone();
 				let mut s = String::new();
-				file.read_to_string(&mut s).unwrap();
+				f2.read_to_string(&mut s).unwrap();
 				s
 			},
-			StrRes::FilePath(path) => {
+			&StrRes::FilePath(ref path) => {
 				let file = File::open(path).unwrap();
 				StrRes::FileHandle(file).get_string()
 			},
-			StrRes::Empty => "".to_owned(),
+			&StrRes::Empty => "".to_owned(),
 		}
 	}
 	pub fn with_filename<T, F: FnOnce(&Path) -> T>(&self, f: F) -> T {
