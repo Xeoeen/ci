@@ -59,6 +59,8 @@ pub enum Args {
 		executables: Vec<PathBuf>,
 		#[structopt(long = "checker", parse(try_from_str = "parse_checker"), default_value = "\0CheckerDiffOut", help = "Path to checker")]
 		checker: Box<checkers::Checker>,
+		#[structopt(short = "n", long = "count")]
+		count: Option<i64>,
 	},
 	#[structopt(name = "vendor", about = "Merge solution and it's dependencies into single file")]
 	Vendor {
