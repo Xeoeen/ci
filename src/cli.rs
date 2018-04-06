@@ -29,45 +29,45 @@ fn parse_standard(s: &str) -> Result<commands::build::CppVer, i32> {
 }
 
 #[derive(StructOpt)]
-#[structopt(name = "ci", about = "CLI for building and testing programming contest tasks")]
+#[structopt(name = "ci", about = "CLI for building and testing programming contest tasks", raw(global_setting = "structopt::clap::AppSettings::VersionlessSubcommands"))]
 pub enum Args {
-	#[structopt(name = "build")]
+	#[structopt(name = "build", about = "Compile solution with useful flags")]
 	Build {
-		#[structopt(name = "SOURCE", parse(from_os_str))]
+		#[structopt(name = "SOURCE", parse(from_os_str), help = "Path to source file")]
 		source: PathBuf,
-		#[structopt(short = "O", long = "release")]
+		#[structopt(short = "O", long = "release", help = "Enable optimizations")]
 		release: bool,
-		#[structopt(long = "standard", parse(try_from_str = "parse_standard"), default_value = "17")]
+		#[structopt(long = "standard", parse(try_from_str = "parse_standard"), default_value = "17", help = "For choosing cpp version")]
 		standard: commands::build::CppVer,
 	},
-	#[structopt(name = "test")]
+	#[structopt(name = "test", about = "Run ans check solution on tests from directory")]
 	Test {
-		#[structopt(name = "EXECUTABLE", parse(from_os_str))]
+		#[structopt(name = "EXECUTABLE", parse(from_os_str), help = "Path to executable")]
 		executable: PathBuf,
-		#[structopt(name = "TESTDIR", parse(from_os_str))]
+		#[structopt(name = "TESTDIR", parse(from_os_str), help = "Path to test directory")]
 		testdir: PathBuf,
-		#[structopt(long = "checker", parse(try_from_str = "parse_checker"), default_value = "\0CheckerDiffOut")]
+		#[structopt(long = "checker", parse(try_from_str = "parse_checker"), default_value = "\0CheckerDiffOut", help = "Path to checker")]
 		checker: Box<checkers::Checker>,
-		#[structopt(long = "no-print-success")]
+		#[structopt(long = "no-print-success", help = "Do not print successful tests")]
 		no_print_success: bool,
 	},
-	#[structopt(name = "multitest")]
+	#[structopt(name = "multitest", about = "Run solution on random tests until it fails")]
 	Multitest {
-		#[structopt(name = "GEN", parse(from_os_str))]
+		#[structopt(name = "GEN", parse(from_os_str), help = "Path to test generator")]
 		gen: PathBuf,
-		#[structopt(name = "EXECUTABLES", parse(from_os_str))]
+		#[structopt(name = "EXECUTABLES", parse(from_os_str), help = "Paths to executables")]
 		executables: Vec<PathBuf>,
-		#[structopt(long = "checker", parse(try_from_str = "parse_checker"), default_value = "\0CheckerDiffOut")]
+		#[structopt(long = "checker", parse(try_from_str = "parse_checker"), default_value = "\0CheckerDiffOut", help = "Path to checker")]
 		checker: Box<checkers::Checker>,
 	},
-	#[structopt(name = "vendor")]
+	#[structopt(name = "vendor", about = "Merge solution and it's dependencies into single file")]
 	Vendor {
-		#[structopt(name = "SOURCE", parse(from_os_str))]
+		#[structopt(name = "SOURCE", parse(from_os_str), help = "Path to source file")]
 		source: PathBuf,
 	},
-	#[structopt(name = "internal-autocomplete")]
+	#[structopt(name = "internal-autocomplete", about = "Generate autocompletion script for appropriate shell")]
 	InternalAutocomplete {
-		#[structopt(name = "SHELL", parse(try_from_str = "parse_shell"))]
+		#[structopt(name = "SHELL", parse(try_from_str = "parse_shell"), help = "Shell name")]
 		shell: structopt::clap::Shell,
 	},
 }
