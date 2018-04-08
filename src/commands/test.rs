@@ -10,6 +10,7 @@ use colored::*;
 use itertools::{self, Itertools};
 use pbr;
 use walkdir;
+use error::*;
 
 fn ord_by_test_number(lhs: &std::path::PathBuf, rhs: &std::path::PathBuf) -> Ordering {
 	for grp in lhs.to_str().unwrap().chars().group_by(|c| c.is_numeric()).into_iter().zip_longest(rhs.to_str().unwrap().chars().group_by(|c| c.is_numeric()).into_iter()) {
@@ -43,14 +44,15 @@ fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>
 	Box::new(tests.into_iter())
 }
 
-pub fn run(args: Args) {
+pub fn run(args: Args) -> Result<()>{
 	if let Args::Test { executable, testdir, no_print_success, checker } = args {
-		diagnose_app(&executable);
+		ensure!(testdir.as_path().exists(), err_msg("test directory does not exist"));
+		diagnose_app(&executable)?;
 		let test_count = recursive_find_tests(&testdir).count();
 		let mut pb = pbr::ProgressBar::new(test_count as u64);
 		for ref in_path in recursive_find_tests(&testdir) {
 			let out_path = in_path.with_extension("out");
-			let (outcome, timing) = test_single(&executable, StrRes::from_path(in_path), StrRes::from_path(&out_path), checker.as_ref());
+			let (outcome, timing) = test_single(&executable, StrRes::from_path(in_path), StrRes::from_path(&out_path), checker.as_ref())?;
 			if outcome != TestResult::Accept || !no_print_success {
 				let rstr = outcome.format_long();
 				let timestr = timefmt(timing).blue().bold();
@@ -58,5 +60,9 @@ pub fn run(args: Args) {
 			}
 			pb.inc();
 		}
+		Ok(())
+	}
+	else {
+		Err(Error::from(CliError::WrongCommand))
 	}
 }

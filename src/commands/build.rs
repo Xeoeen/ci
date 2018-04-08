@@ -1,6 +1,8 @@
 use cli::Args;
 use std;
 use std::path::Path;
+use std::ffi::OsStr;
+use error::*;
 
 pub enum CppVer {
 	Cpp11,
@@ -15,7 +17,7 @@ impl CppVer {
 	}
 }
 
-fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) {
+fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) -> Result<()> {
     let mut args = vec![];
 	args.push(cppver.flag());
 	args.extend_from_slice(&["-Wall", "-Wextra", "-Wconversion", "-Wno-sign-conversion"]);
@@ -30,14 +32,27 @@ fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) {
     let mut kid = std::process::Command::new("clang++")
         .args(&args)
         .stderr(std::process::Stdio::inherit())
-        .spawn().unwrap();
-    assert!(kid.wait().unwrap().success());
+        .spawn()?;
+	let status = kid.wait()?;
+
+	if !status.success() {
+		return Err(
+			Error::from(
+				RuntimeError::NonZeroStatus(status.code().unwrap_or(101))
+							.context(format_err!("Failed to compile withflags {:?}", &args))
+			)
+		);
+	}
+	Ok(())
 }
 
-pub fn run(args: Args) {
+pub fn run(args: Args) -> Result<()> {
 	if let Args::Build { source, release, standard } = args {
-		assert!(source.extension().unwrap() == "cpp");
+		ensure!(source.extension().unwrap_or(OsStr::new("")) == "cpp", FileError::InvalidFileExtension("cpp".to_string(), source.to_str().unwrap().to_string()));
 		let executable = source.with_extension("e");
-		compile_cpp(&source, &executable, release, standard);
+		compile_cpp(&source, &executable, release, standard)
+	}
+	else {
+		Err(Error::from(CliError::WrongCommand))
 	}
 }

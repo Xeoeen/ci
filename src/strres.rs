@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use std::io::{Read, Write};
 use std::process::{Command, Stdio};
 use tempfile::{NamedTempFile};
+use error::*;
 
 pub enum StrRes {
 	InMemory(String),
@@ -17,20 +18,20 @@ impl StrRes {
 		StrRes::FilePath(path.to_owned())
 	}
 
-	pub fn get_string(&self) -> String {
+	pub fn get_string(&self) -> Result<String> {
 		match self {
-			&StrRes::InMemory(ref s) => s.clone(),
+			&StrRes::InMemory(ref s) => Ok(s.clone()),
 			&StrRes::FileHandle(ref file) => {
 				let mut f2 = file.clone();
 				let mut s = String::new();
-				f2.read_to_string(&mut s).unwrap();
-				s
+				f2.read_to_string(&mut s)?;
+				Ok(s)
 			},
 			&StrRes::FilePath(ref path) => {
-				let file = File::open(path).unwrap();
+				let file = File::open(path)?;
 				StrRes::FileHandle(file).get_string()
 			},
-			&StrRes::Empty => "".to_owned(),
+			&StrRes::Empty => Ok("".to_owned()),
 		}
 	}
 	pub fn with_filename<T, F: FnOnce(&Path) -> T>(&self, f: F) -> T {
@@ -63,11 +64,8 @@ impl StrRes {
 
 }
 
-#[derive(Debug)]
-pub enum ExecE {
-	NonZeroStatus,
-}
-pub fn exec(executable: &Path, input: StrRes) -> Result<StrRes, ExecE> {
+
+pub fn exec(executable: &Path, input: StrRes) -> Result<StrRes> {
 	let (stdin_settings, to_write) = match input {
 		StrRes::InMemory(s) => (Stdio::piped(), Some(s)),
 		StrRes::FileHandle(file) => (Stdio::from(file), None),
@@ -78,14 +76,14 @@ pub fn exec(executable: &Path, input: StrRes) -> Result<StrRes, ExecE> {
 		.stdin(stdin_settings)
 		.stdout(Stdio::piped())
 		.stderr(Stdio::inherit())
-		.spawn().unwrap();
+		.spawn()?;
 	if let Some(piped_input) = to_write {
-		kid.stdin.as_mut().unwrap().write_all(piped_input.as_bytes()).unwrap();
+		kid.stdin.as_mut().ok_or(RuntimeError::StdioFail)?.write_all(piped_input.as_bytes())?;
 	}
-	let out = kid.wait_with_output().unwrap();
-	if !out.status.success() {
-		return Err(ExecE::NonZeroStatus);
-	}
-	let out_str = String::from_utf8(out.stdout).unwrap();
+	let out = kid.wait_with_output()?;
+
+	ensure!(out.status.success(), RuntimeError::NonZeroStatus(out.status.code().unwrap_or(101)));
+	
+	let out_str = String::from_utf8(out.stdout)?;
 	Ok(StrRes::InMemory(out_str))
 }

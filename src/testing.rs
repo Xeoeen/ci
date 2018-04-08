@@ -4,6 +4,7 @@ use util::timefn;
 use std;
 use std::path::Path;
 use colored::*;
+use error::*;
 
 #[derive(PartialEq, Eq)]
 pub enum TestResult {
@@ -28,15 +29,15 @@ impl TestResult {
 		}
 	}
 }
-pub fn test_single(executable: &Path, input: StrRes, perfect_output: StrRes, checker: &Checker) -> (TestResult, std::time::Duration) {
+pub fn test_single(executable: &Path, input: StrRes, perfect_output: StrRes, checker: &Checker) -> Result<(TestResult, std::time::Duration)> {
 	let (my_output, timing) = timefn(|| exec(executable, input.clone()));
-	(if let Ok(my_output) = my_output {
-		if checker.check(input, my_output, perfect_output) {
+	Ok((if let Ok(output) = my_output {
+		if try!(checker.check(input, output, perfect_output)) {
 			TestResult::Accept
 		} else {
 			TestResult::WrongAnswer
 		}
 	} else {
 		TestResult::RuntimeError
-	}, timing)
+	}, timing))
 }
