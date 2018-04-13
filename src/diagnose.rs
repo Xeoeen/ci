@@ -4,14 +4,26 @@ use std::io::Write;
 use std::path::Path;
 
 pub fn diagnose_app(app: &Path) {
-	if app.extension().map(|ext| ext == "e").unwrap_or(false) && app.with_extension("cpp").exists() {
+	if has_extension(app, "e") {
 		let srcfile = app.with_extension("cpp");
-		let meta_app = std::fs::metadata(app).unwrap();
-		let meta_src = std::fs::metadata(srcfile).unwrap();
-		if meta_src.modified().unwrap() > meta_app.modified().unwrap() {
-			eprint!("{} .e is older than corresponding .cpp file ({}). Continue?", "WARNING".red().bold(), app.display());
-			std::io::stderr().flush().unwrap();
-			std::io::stdin().read_line(&mut String::new()).unwrap();
+		if srcfile.exists() && older_than(app, &srcfile) {
+			warn(&format!(".e is older than corresponding .cpp file ({})", app.display()));
 		}
 	}
+}
+
+fn has_extension(path: &Path, ext: &str) -> bool {
+	path.extension().map(|e| e == ext).unwrap_or(false)
+}
+
+fn warn(s: &str) {
+	eprint!("{} {}. Continue? ", "WARNING".red().bold(), s);
+	std::io::stderr().flush().unwrap();
+	std::io::stdin().read_line(&mut String::new()).unwrap();
+}
+
+fn older_than(a: &Path, b: &Path) -> bool {
+	let meta1 = std::fs::metadata(a).unwrap();
+	let meta2 = std::fs::metadata(b).unwrap();
+	meta1.modified().unwrap() < meta2.modified().unwrap()
 }
