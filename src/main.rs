@@ -4,6 +4,9 @@ extern crate colored;
 extern crate tempfile;
 extern crate pbr;
 extern crate itertools;
+extern crate keyring;
+extern crate rpassword;
+extern crate sio2;
 
 mod checkers;
 mod diagnose;
@@ -24,6 +27,7 @@ fn main() {
 		Args::Test { .. } => commands::test::run(args),
 		Args::Multitest { .. } => commands::multitest::run(args),
 		Args::Vendor { .. } => commands::vendor::run(args),
+		Args::Init { .. } => commands::init::run(args),
 		Args::InternalAutocomplete { .. } => commands::genbashauto::run(args),
 	}
 }

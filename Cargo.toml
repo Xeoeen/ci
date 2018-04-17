@@ -11,3 +11,6 @@ colored = "1.5"
 tempfile = "2.2"
 pbr = "1.0"
 itertools = "0.7"
+keyring = "0.6"
+rpassword = "2"
+sio2 = { git = "https://github.com/matcegla/sio2" }

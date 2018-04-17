@@ -67,6 +67,11 @@ pub enum Args {
 		#[structopt(name = "SOURCE", parse(from_os_str), help = "Solution source path")]
 		source: PathBuf,
 	},
+	#[structopt(name = "init", about = "Set up working environment and download tests")]
+	Init {
+		#[structopt(name = "URL", help = "Task description URL")]
+		url: String,
+	},
 	#[structopt(name = "internal-autocomplete", about = "Generate autocompletion script for appropriate shell")]
 	InternalAutocomplete {
 		#[structopt(name = "SHELL", parse(try_from_str = "parse_shell"), help = "Shell name")]
