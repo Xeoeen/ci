@@ -6,6 +6,8 @@ pub trait Checker {
 	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> Result<bool>;
 }
 
+pub type CheckerBox = std::boxed::Box<Checker + 'static>;
+
 pub struct CheckerDiffOut;
 impl Checker for CheckerDiffOut {
 	fn check(&self, _input: StrRes, my_output: StrRes, perfect_output: StrRes) -> Result<bool> {

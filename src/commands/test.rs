@@ -1,8 +1,8 @@
-use cli::Args;
 use diagnose::diagnose_app;
 use strres::StrRes;
 use ui::timefmt;
 use testing::{test_single, TestResult};
+use checkers::CheckerBox;
 use std;
 use std::cmp::Ordering;
 use std::path::Path;
@@ -44,25 +44,20 @@ fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>
 	Box::new(tests.into_iter())
 }
 
-pub fn run(args: Args) -> Result<()>{
-	if let Args::Test { executable, testdir, no_print_success, checker } = args {
-		ensure!(testdir.as_path().exists(), err_msg("test directory does not exist"));
-		diagnose_app(&executable)?;
-		let test_count = recursive_find_tests(&testdir).count();
-		let mut pb = pbr::ProgressBar::new(test_count as u64);
-		for ref in_path in recursive_find_tests(&testdir) {
-			let out_path = in_path.with_extension("out");
-			let (outcome, timing) = test_single(&executable, StrRes::from_path(in_path), StrRes::from_path(&out_path), checker.as_ref())?;
-			if outcome != TestResult::Accept || !no_print_success {
-				let rstr = outcome.format_long();
-				let timestr = timefmt(timing).blue().bold();
-				pb_interwrite!(pb, "{} {} {}", rstr, timestr, in_path.display());
-			}
-			pb.inc();
+pub fn run(executable: &Path, testdir: &Path, checker: CheckerBox, no_print_success: bool) -> Result<()>{
+	ensure!(testdir.exists(), err_msg("test directory does not exist"));
+	diagnose_app(&executable)?;
+	let test_count = recursive_find_tests(&testdir).count();
+	let mut pb = pbr::ProgressBar::new(test_count as u64);
+	for ref in_path in recursive_find_tests(&testdir) {
+		let out_path = in_path.with_extension("out");
+		let (outcome, timing) = test_single(&executable, StrRes::from_path(in_path), StrRes::from_path(&out_path), checker.as_ref())?;
+		if outcome != TestResult::Accept || !no_print_success {
+			let rstr = outcome.format_long();
+			let timestr = timefmt(timing).blue().bold();
+			pb_interwrite!(pb, "{} {} {}", rstr, timestr, in_path.display());
 		}
-		Ok(())
+		pb.inc();
 	}
-	else {
-		Err(Error::from(CliError::WrongCommand))
-	}
+	Ok(())
 }

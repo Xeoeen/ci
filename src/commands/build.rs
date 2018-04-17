@@ -1,4 +1,3 @@
-use cli::Args;
 use std;
 use std::path::Path;
 use std::ffi::OsStr;
@@ -46,13 +45,8 @@ fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) -> R
 	Ok(())
 }
 
-pub fn run(args: Args) -> Result<()> {
-	if let Args::Build { source, release, standard } = args {
-		ensure!(source.extension().unwrap_or(OsStr::new("")) == "cpp", FileError::InvalidFileExtension("cpp".to_string(), source.to_str().unwrap().to_string()));
-		let executable = source.with_extension("e");
-		compile_cpp(&source, &executable, release, standard)
-	}
-	else {
-		Err(Error::from(CliError::WrongCommand))
-	}
+pub fn run(source: &Path, release: bool, standard: CppVer) -> Result<()> {
+	ensure!(source.extension().unwrap_or(OsStr::new("")) == "cpp", FileError::InvalidFileExtension("cpp".to_string(), source.to_str().unwrap().to_string()));
+	let executable = source.with_extension("e");
+	compile_cpp(&source, &executable, release, standard)
 }

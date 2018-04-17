@@ -19,7 +19,7 @@ fn parse_standard(s: &str) -> Result<commands::build::CppVer> {
 	} else if s == "11" {
 		Ok(commands::build::CppVer::Cpp11)
 	} else {
-		Err(Error::from(ParseError{}))
+		Err(Error::from(ParseError))
 	}
 }
 

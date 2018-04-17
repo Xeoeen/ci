@@ -23,10 +23,4 @@ pub enum FileError {
 
 #[derive(Debug, Fail)]
 #[fail(display = "failed while parsing cli arguments")]
-pub struct ParseError {}
-
-#[derive(Debug, Fail)]
-pub enum CliError {
-    #[fail(display = "expected another subcommand")]
-    WrongCommand
-}
+pub struct ParseError;

@@ -25,11 +25,11 @@ use error::*;
 fn run() -> Result<()> {
 	let args = Args::from_args();
 	match args {
-		Args::Build { .. } => commands::build::run(args),
-		Args::Test { .. } => commands::test::run(args),
-		Args::Multitest { .. } => commands::multitest::run(args),
-		Args::Vendor { .. } => commands::vendor::run(args),
-		Args::InternalAutocomplete { .. } => commands::genautocomplete::run(args),
+		Args::Build { source, release, standard } => commands::build::run(source.as_path(), release, standard),
+		Args::Test { executable, testdir, checker, no_print_success } => commands::test::run(executable.as_path(), testdir.as_path(), checker, no_print_success),
+		Args::Multitest { gen, executables, checker, count} => commands::multitest::run(gen.as_path(), &executables, checker, count),
+		Args::Vendor { source} => commands::vendor::run(source.as_path()),
+		Args::InternalAutocomplete { shell } => commands::genautocomplete::run(shell),
 	}
 }
 
