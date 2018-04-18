@@ -12,8 +12,7 @@ use std::process::Stdio;
 pub struct Oioioi;
 
 impl Site for Oioioi {
-	fn download_tests(rawurl: &str) -> Vec<Test> {
-		let url: Url = rawurl.parse().unwrap();
+	fn download_tests(url: &Url) -> Vec<Test> {
 		let domain = url.domain().unwrap();
 		let (user, pass) = read_auth(domain);
 		let site = format!("https://{}", domain).parse().unwrap();

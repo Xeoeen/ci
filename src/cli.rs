@@ -3,7 +3,7 @@ use checkers;
 use commands;
 use std::path::{PathBuf};
 use error::*;
-
+use sio2::Url;
 
 fn parse_checker(s: &str) -> Result<Box<checkers::Checker>> {
 	if s == "\0CheckerDiffOut" {
@@ -65,7 +65,7 @@ pub enum Args {
 	#[structopt(name = "init", about = "Set up working environment and download tests")]
 	Init {
 		#[structopt(name = "URL", help = "Task description URL")]
-		url: String,
+		url: Url,
 	},
 	#[structopt(name = "internal-autocomplete", about = "Generate autocompletion script for appropriate shell")]
 	InternalAutocomplete {

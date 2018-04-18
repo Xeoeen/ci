@@ -5,12 +5,12 @@ use std::path::Path;
 use error::*;
 use std::process::Command;
 
-pub fn diagnose_app(app: &Path) -> Result<()>{
-	let meta_app = std::fs::metadata(app).context(format_err!("Failed to execute {:?}", app))?;
+pub fn diagnose_app(app: &Path) -> Result<()> {
+	std::fs::metadata(app).context(format_err!("Failed to execute {:?}", app))?;
   
 	if has_extension(app, "e") {
 		let srcfile = app.with_extension("cpp");
-		if srcfile.exists() && older_than(app, &srcfile) {
+		if srcfile.exists() && older_than(app, &srcfile)? {
 			warn(&format!(".e is older than corresponding .cpp file ({})", app.display()));
 		}
 	}
@@ -32,5 +32,5 @@ fn warn(s: &str) {
 fn older_than(a: &Path, b: &Path) -> Result<bool> {
 	let meta1 = std::fs::metadata(a)?;
 	let meta2 = std::fs::metadata(b)?;
-	meta1.modified()? < meta2.modified()?
+	Ok(meta1.modified()? < meta2.modified()?)
 }

@@ -35,7 +35,7 @@ fn run() -> Result<()> {
 		Args::Multitest { gen, executables, checker, count} => commands::multitest::run(gen.as_path(), &executables, checker, count),
 		Args::Vendor { source} => commands::vendor::run(source.as_path()),
 		Args::InternalAutocomplete { shell } => commands::genautocomplete::run(shell),
-    Args::Init { url } => commands::init::run(url),
+    	Args::Init { url } => commands::init::run(url),
 	}
 }
 
