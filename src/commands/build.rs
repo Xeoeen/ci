@@ -38,7 +38,10 @@ fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) -> R
 		return Err(
 			Error::from(
 				RuntimeError::NonZeroStatus(status.code().unwrap_or(101))
-							.context(format_err!("Failed to compile withflags {:?}", &args))
+								.context(
+									format_err!("Failed to compile using standard {} in {} mode",
+										cppver.flag(), if release { "release" } else { "debug" } )
+								)
 			)
 		);
 	}
