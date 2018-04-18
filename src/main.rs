@@ -6,6 +6,8 @@ extern crate pbr;
 extern crate itertools;
 extern crate keyring;
 extern crate rpassword;
+extern crate reqwest;
+extern crate select;
 extern crate sio2;
 
 mod checkers;

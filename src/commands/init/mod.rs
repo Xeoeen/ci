@@ -1,3 +1,4 @@
+mod codeforces;
 mod oioioi;
 
 use super::super::cli::Args;
@@ -27,6 +28,7 @@ pub fn run(args: Args) {
 }
 
 const MATCHERS: &[(&'static str, fn(&str) -> Vec<Test>)] = &[
+	("codeforces.com", codeforces::Codeforces::download_tests),
 	("sio2.staszic.waw.pl", oioioi::Oioioi::download_tests),
 ];
 
