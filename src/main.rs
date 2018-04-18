@@ -6,6 +6,11 @@ extern crate colored;
 extern crate tempfile;
 extern crate pbr;
 extern crate itertools;
+extern crate keyring;
+extern crate rpassword;
+extern crate reqwest;
+extern crate select;
+extern crate sio2;
 
 mod error;
 mod checkers;
@@ -30,6 +35,7 @@ fn run() -> Result<()> {
 		Args::Multitest { gen, executables, checker, count} => commands::multitest::run(gen.as_path(), &executables, checker, count),
 		Args::Vendor { source} => commands::vendor::run(source.as_path()),
 		Args::InternalAutocomplete { shell } => commands::genautocomplete::run(shell),
+    Args::Init { url } => commands::init::run(url),
 	}
 }
 
@@ -42,5 +48,6 @@ fn main() {
 			println!("{}: {}", cause_prefix, cause);
 		}
 		::std::process::exit(1);
+		
 	}
 }

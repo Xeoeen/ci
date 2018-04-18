@@ -7,15 +7,30 @@ use std::process::Command;
 
 pub fn diagnose_app(app: &Path) -> Result<()>{
 	let meta_app = std::fs::metadata(app).context(format_err!("Failed to execute {:?}", app))?;
-	if app.extension().map(|ext| ext == "e").unwrap_or(false) && app.with_extension("cpp").exists() {
+  
+	if has_extension(app, "e") {
 		let srcfile = app.with_extension("cpp");
-		let meta_src = std::fs::metadata(srcfile).context("Could not extract metadata from source file")?;
-		if meta_src.modified()? > meta_app.modified()? {
-			eprint!("{} .e is older than corresponding .cpp file ({}). Continue?", "WARNING".red().bold(), app.display());
-			std::io::stderr().flush()?;
-			std::io::stdin().read_line(&mut String::new())?;
+		if srcfile.exists() && older_than(app, &srcfile) {
+			warn(&format!(".e is older than corresponding .cpp file ({})", app.display()));
 		}
 	}
+  
 	Command::new(app).spawn().context(format_err!("Failed to execute {:?}", app))?.kill()?;
 	Ok(())
+}
+
+fn has_extension(path: &Path, ext: &str) -> bool {
+	path.extension().map(|e| e == ext).unwrap_or(false)
+}
+
+fn warn(s: &str) {
+	eprint!("{} {}. Continue? ", "WARNING".red().bold(), s);
+	std::io::stderr().flush().unwrap();
+	std::io::stdin().read_line(&mut String::new()).unwrap();
+}
+
+fn older_than(a: &Path, b: &Path) -> Result<bool> {
+	let meta1 = std::fs::metadata(a)?;
+	let meta2 = std::fs::metadata(b)?;
+	meta1.modified()? < meta2.modified()?
 }
