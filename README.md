@@ -76,3 +76,10 @@ ci vendor kitties.cpp
 When running your code in testing environments, you will not have access to various helpful header-only libraries like your personal algorithm collections, [mc](https://github.com/matcegla/mc) or [Boost.Graph](http://www.boost.org/doc/libs/1_66_0/libs/graph/doc/table_of_contents.html). This command will only run the preprocessor, copy-pasting these libraries into your code so you can send it to an online judge system.
 
 To use the command, a directory `/usr/share/ci/dummy-includes` must be created, with all the includes you do not want copy-pasted(like `<iostream>`). To do this, create a file in this directory, like `sudo touch /usr/share/ci/dummy-includes/iostream`.
+
+### `ci init`
+
+```bash
+ci init http://codeforces.com/contest/960/problem/D
+```
+To save time on entering example tests, this command will download and save them to `./tests/example` directory for you. Few task formats are supported.

@@ -9,6 +9,6 @@ pub fn timefn<T, F: FnOnce() -> T>(f: F) -> (T, std::time::Duration) {
 	(x, t)
 }
 pub fn writefile(path: &str, content: &str) {
-	let mut f = File::open(path).unwrap();
+	let mut f = File::create(path).unwrap();
 	f.write_all(content.as_bytes()).unwrap();
 }

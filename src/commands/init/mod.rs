@@ -16,8 +16,8 @@ pub trait Site {
 
 pub fn run(args: Args) {
 	if let Args::Init { url } = args {
-		create_dir("./tests/").unwrap();
-		create_dir("./tests/example/").unwrap();
+		create_dir("./tests/").ok();
+		create_dir("./tests/example/").ok();
 		let tests = acquire_tests(&url);
 		for (i, test) in tests.into_iter().enumerate() {
 			writefile(&format!("./tests/example/{}.in", i+1), &test.input);
