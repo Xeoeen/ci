@@ -1,29 +1,33 @@
 use std;
 use strres::StrRes;
+use error::*;
 
 pub trait Checker {
-	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> bool;
+	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool>;
 }
+
+pub type CheckerBox = std::boxed::Box<Checker + 'static>;
 
 pub struct CheckerDiffOut;
 impl Checker for CheckerDiffOut {
-	fn check(&self, _input: StrRes, my_output: StrRes, perfect_output: StrRes) -> bool {
-		equal_bew(&my_output.get_string(), &perfect_output.get_string())
+	fn check(&self, _input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool> {
+		Ok(equal_bew(&my_output.get_string()?, &perfect_output.get_string()?))
 	}
 }
 
 pub struct CheckerApp {
 	pub app: String,
 }
+
 impl Checker for CheckerApp {
-	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> bool {
+	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool> {
 		input.with_filename(|i_path| {
 			my_output.with_filename(|mo_path| {
 				perfect_output.with_filename(|po_path| {
-					std::process::Command::new(&self.app)
+					Ok(std::process::Command::new(&self.app)
 						.args(&[i_path, mo_path, po_path])
-						.status().unwrap()
-						.success()
+						.status().context(format_err!("Running checker {}", self.app))?
+						.success())
 				})
 			})
 		})

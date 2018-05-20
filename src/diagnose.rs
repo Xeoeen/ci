@@ -2,14 +2,21 @@ use colored::*;
 use std;
 use std::io::Write;
 use std::path::Path;
+use error::*;
+use std::process::Command;
 
-pub fn diagnose_app(app: &Path) {
+pub fn diagnose_app(app: &Path) -> R<()> {
+	std::fs::metadata(app).context(format_err!("Failed to execute {:?}", app))?;
+  
 	if has_extension(app, "e") {
 		let srcfile = app.with_extension("cpp");
-		if srcfile.exists() && older_than(app, &srcfile) {
+		if srcfile.exists() && older_than(app, &srcfile)? {
 			warn(&format!(".e is older than corresponding .cpp file ({})", app.display()));
 		}
 	}
+  
+	Command::new(app).spawn().context(format_err!("Failed to execute {:?}", app))?.kill()?;
+	Ok(())
 }
 
 fn has_extension(path: &Path, ext: &str) -> bool {
@@ -22,8 +29,8 @@ fn warn(s: &str) {
 	std::io::stdin().read_line(&mut String::new()).unwrap();
 }
 
-fn older_than(a: &Path, b: &Path) -> bool {
-	let meta1 = std::fs::metadata(a).unwrap();
-	let meta2 = std::fs::metadata(b).unwrap();
-	meta1.modified().unwrap() < meta2.modified().unwrap()
+fn older_than(a: &Path, b: &Path) -> R<bool> {
+	let meta1 = std::fs::metadata(a)?;
+	let meta2 = std::fs::metadata(b)?;
+	Ok(meta1.modified()? < meta2.modified()?)
 }
