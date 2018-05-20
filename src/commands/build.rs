@@ -16,7 +16,7 @@ impl CppVer {
 	}
 }
 
-fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) -> Result<()> {
+fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) -> R<()> {
     let mut args = vec![];
 	args.push(cppver.flag());
 	args.extend_from_slice(&["-Wall", "-Wextra", "-Wconversion", "-Wno-sign-conversion"]);
@@ -37,7 +37,7 @@ fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) -> R
 	if !status.success() {
 		return Err(
 			Error::from(
-				RuntimeError::NonZeroStatus(status.code().unwrap_or(101))
+				E::NonZeroStatus(status.code().unwrap_or(101))
 								.context(
 									format_err!("Failed to compile using standard {} in {} mode",
 										cppver.flag(), if release { "release" } else { "debug" } )
@@ -48,8 +48,8 @@ fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) -> R
 	Ok(())
 }
 
-pub fn run(source: &Path, release: bool, standard: CppVer) -> Result<()> {
-	ensure!(source.extension().unwrap_or(OsStr::new("")) == "cpp", FileError::InvalidFileExtension("cpp".to_string(), source.to_str().unwrap().to_string()));
+pub fn run(source: &Path, release: bool, standard: CppVer) -> R<()> {
+	ensure!(source.extension().unwrap_or(OsStr::new("")) == "cpp", E::InvalidFileExtension("cpp".to_string(), source.to_str().unwrap().to_string()));
 	let executable = source.with_extension("e");
 	compile_cpp(&source, &executable, release, standard)
 }

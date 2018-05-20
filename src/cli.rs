@@ -5,7 +5,7 @@ use std::path::{PathBuf};
 use error::*;
 use sio2::Url;
 
-fn parse_checker(s: &str) -> Result<Box<checkers::Checker>> {
+fn parse_checker(s: &str) -> R<Box<checkers::Checker>> {
 	if s == "\0CheckerDiffOut" {
 		Ok(Box::new(checkers::CheckerDiffOut {}))
 	} else {
@@ -13,13 +13,13 @@ fn parse_checker(s: &str) -> Result<Box<checkers::Checker>> {
 	}
 }
 
-fn parse_standard(s: &str) -> Result<commands::build::CppVer> {
+fn parse_standard(s: &str) -> R<commands::build::CppVer> {
 	if s == "17" {
 		Ok(commands::build::CppVer::Cpp17)
 	} else if s == "11" {
 		Ok(commands::build::CppVer::Cpp11)
 	} else {
-		Err(Error::from(ParseError))
+		Err(Error::from(ParseError { expected: "{17, 11}", found: s.to_owned() }))
 	}
 }
 

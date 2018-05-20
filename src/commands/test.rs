@@ -44,7 +44,7 @@ fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>
 	Box::new(tests.into_iter())
 }
 
-pub fn run(executable: &Path, testdir: &Path, checker: CheckerBox, no_print_success: bool) -> Result<()>{
+pub fn run(executable: &Path, testdir: &Path, checker: CheckerBox, no_print_success: bool) -> R<()>{
 	ensure!(testdir.exists(), err_msg("test directory does not exist"));
 	diagnose_app(&executable)?;
 	let test_count = recursive_find_tests(&testdir).count();

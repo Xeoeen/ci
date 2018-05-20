@@ -27,7 +27,7 @@ use cli::Args;
 use colored::Colorize;
 use error::*;
 
-fn run() -> Result<()> {
+fn run() -> R<()> {
 	let args = Args::from_args();
 	match args {
 		Args::Build { source, release, standard } => commands::build::run(source.as_path(), release, standard),

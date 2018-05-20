@@ -29,7 +29,7 @@ impl TestResult {
 		}
 	}
 }
-pub fn test_single(executable: &Path, input: StrRes, perfect_output: StrRes, checker: &Checker) -> Result<(TestResult, std::time::Duration)> {
+pub fn test_single(executable: &Path, input: StrRes, perfect_output: StrRes, checker: &Checker) -> R<(TestResult, std::time::Duration)> {
 	let (my_output, timing) = timefn(|| exec(executable, input.clone()));
 	Ok((if let Ok(output) = my_output {
 		if try!(checker.check(input, output, perfect_output)) {

@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use colored::*;
 use error::*;
 
-pub fn run(gen: &Path, executables: &[PathBuf], checker: CheckerBox, count: Option<i64>) -> Result<()> {
+pub fn run(gen: &Path, executables: &[PathBuf], checker: CheckerBox, count: Option<i64>) -> R<()> {
 	for ref executable in executables {
 		diagnose_app(executable)?;
 	}

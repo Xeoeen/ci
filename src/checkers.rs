@@ -3,14 +3,14 @@ use strres::StrRes;
 use error::*;
 
 pub trait Checker {
-	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> Result<bool>;
+	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool>;
 }
 
 pub type CheckerBox = std::boxed::Box<Checker + 'static>;
 
 pub struct CheckerDiffOut;
 impl Checker for CheckerDiffOut {
-	fn check(&self, _input: StrRes, my_output: StrRes, perfect_output: StrRes) -> Result<bool> {
+	fn check(&self, _input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool> {
 		Ok(equal_bew(&my_output.get_string()?, &perfect_output.get_string()?))
 	}
 }
@@ -20,7 +20,7 @@ pub struct CheckerApp {
 }
 
 impl Checker for CheckerApp {
-	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> Result<bool> {
+	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool> {
 		input.with_filename(|i_path| {
 			my_output.with_filename(|mo_path| {
 				perfect_output.with_filename(|po_path| {

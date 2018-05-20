@@ -5,7 +5,7 @@ use std::path::Path;
 use error::*;
 use std::process::Command;
 
-pub fn diagnose_app(app: &Path) -> Result<()> {
+pub fn diagnose_app(app: &Path) -> R<()> {
 	std::fs::metadata(app).context(format_err!("Failed to execute {:?}", app))?;
   
 	if has_extension(app, "e") {
@@ -29,7 +29,7 @@ fn warn(s: &str) {
 	std::io::stdin().read_line(&mut String::new()).unwrap();
 }
 
-fn older_than(a: &Path, b: &Path) -> Result<bool> {
+fn older_than(a: &Path, b: &Path) -> R<bool> {
 	let meta1 = std::fs::metadata(a)?;
 	let meta2 = std::fs::metadata(b)?;
 	Ok(meta1.modified()? < meta2.modified()?)

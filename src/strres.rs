@@ -18,7 +18,7 @@ impl StrRes {
 		StrRes::FilePath(path.to_owned())
 	}
 
-	pub fn get_string(&self) -> Result<String> {
+	pub fn get_string(&self) -> R<String> {
 		match self {
 			&StrRes::InMemory(ref s) => Ok(s.clone()),
 			&StrRes::FileHandle(ref file) => {
@@ -65,7 +65,7 @@ impl StrRes {
 }
 
 
-pub fn exec(executable: &Path, input: StrRes) -> Result<StrRes> {
+pub fn exec(executable: &Path, input: StrRes) -> R<StrRes> {
 	let (stdin_settings, to_write) = match input {
 		StrRes::InMemory(s) => (Stdio::piped(), Some(s)),
 		StrRes::FileHandle(file) => (Stdio::from(file), None),
@@ -78,11 +78,11 @@ pub fn exec(executable: &Path, input: StrRes) -> Result<StrRes> {
 		.stderr(Stdio::inherit())
 		.spawn()?;
 	if let Some(piped_input) = to_write {
-		kid.stdin.as_mut().ok_or(RuntimeError::StdioFail)?.write_all(piped_input.as_bytes())?;
+		kid.stdin.as_mut().ok_or(E::StdioFail)?.write_all(piped_input.as_bytes())?;
 	}
 	let out = kid.wait_with_output()?;
 
-	ensure!(out.status.success(), RuntimeError::NonZeroStatus(out.status.code().unwrap_or(101)));
+	ensure!(out.status.success(), E::NonZeroStatus(out.status.code().unwrap_or(101)));
 	
 	let out_str = String::from_utf8(out.stdout)?;
 	Ok(StrRes::InMemory(out_str))
