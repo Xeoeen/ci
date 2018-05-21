@@ -1,20 +1,17 @@
 use colored::*;
-use std;
-use std::io::Write;
-use std::path::Path;
 use error::*;
-use std::process::Command;
+use std::{self, io::Write, path::Path, process::Command};
 
 pub fn diagnose_app(app: &Path) -> R<()> {
 	std::fs::metadata(app).context(format_err!("Failed to execute {:?}", app))?;
-  
+
 	if has_extension(app, "e") {
 		let srcfile = app.with_extension("cpp");
 		if srcfile.exists() && older_than(app, &srcfile)? {
 			warn(&format!(".e is older than corresponding .cpp file ({})", app.display()));
 		}
 	}
-  
+
 	Command::new(app).spawn().context(format_err!("Failed to execute {:?}", app))?.kill()?;
 	Ok(())
 }

@@ -11,7 +11,12 @@ impl Site for Codeforces {
 		let doc = Document::from(text.as_str());
 		let samples = doc.find(Class("sample-test")).next().unwrap();
 		let set_count = samples.children().count() / 2;
-		let mut tests: Vec<_> = (0..set_count).map(|_| Test { input: String::new(), output: String::new() }).collect();
+		let mut tests: Vec<_> = (0..set_count)
+			.map(|_| Test {
+				input: String::new(),
+				output: String::new(),
+			})
+			.collect();
 		for (kid, i) in samples.children().zip(0..) {
 			let mut parsed = String::new();
 			let testdiv = kid.children().skip(1).next().unwrap();
@@ -21,9 +26,9 @@ impl Site for Codeforces {
 				}
 			}
 			if i % 2 == 0 {
-				tests[i/2].input = parsed;
+				tests[i / 2].input = parsed;
 			} else {
-				tests[i/2].output = parsed;
+				tests[i / 2].output = parsed;
 			}
 		}
 		for test in &tests {

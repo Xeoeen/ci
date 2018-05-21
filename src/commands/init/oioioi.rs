@@ -1,13 +1,12 @@
 use super::{Site, Test};
+use colored::*;
 use keyring::{Keyring, KeyringError};
 use rpassword;
 use sio2::{self, Url};
-use std::io::{stdin, stderr, Write};
-use colored::*;
-use std::str::from_utf8;
-use std::process::Command;
+use std::{
+	io::{stderr, stdin, Write}, process::{Command, Stdio}, str::from_utf8
+};
 use tempfile::NamedTempFile;
-use std::process::Stdio;
 
 pub struct Oioioi;
 
@@ -27,23 +26,19 @@ fn parse_siopdf(txt: &str) -> Vec<Test> {
 	let important_part = &txt[txt.find("Wejście\n\nWyjście\n\n").unwrap()..txt.rfind("\n\n1/1\n").unwrap()];
 	let sections: Vec<&str> = important_part.split("\n\n").collect();
 	let set_count = sections.iter().filter(|ln| ln.clone() == &"Wejście").count();
-	assert_eq!(sections.len(), 4*set_count);
-	(0..set_count).map(|i| {
-		Test {
-			input: sections[3*set_count+i].to_owned()+"\n",
-			output: sections[3*i+2].to_owned()+"\n",
-		}
-	}).collect()
+	assert_eq!(sections.len(), 4 * set_count);
+	(0..set_count)
+		.map(|i| Test {
+			input: sections[3 * set_count + i].to_owned() + "\n",
+			output: sections[3 * i + 2].to_owned() + "\n",
+		})
+		.collect()
 }
 
 fn pdf2txt(data: Vec<u8>) -> String {
 	let mut file = NamedTempFile::new().unwrap();
 	file.write_all(&data).unwrap();
-	let kid = Command::new("pdf2txt.py")
-		.stdin(Stdio::piped())
-		.stdout(Stdio::piped())
-		.arg(file.path())
-		.spawn().unwrap();
+	let kid = Command::new("pdf2txt.py").stdin(Stdio::piped()).stdout(Stdio::piped()).arg(file.path()).spawn().unwrap();
 	let out = kid.wait_with_output().unwrap();
 	assert!(out.status.success());
 	let txt = from_utf8(&out.stdout).unwrap();
@@ -55,7 +50,7 @@ fn read_auth(domain: &str) -> (String, String) {
 	match key.get_password() {
 		Ok(entry) => {
 			let username = &entry[0..entry.find('#').unwrap()];
-			let password = &entry[entry.find('#').unwrap()+1..];
+			let password = &entry[entry.find('#').unwrap() + 1..];
 			(username.to_owned(), password.to_owned())
 		},
 		Err(e) => {
@@ -80,4 +75,3 @@ fn read_auth(domain: &str) -> (String, String) {
 		},
 	}
 }
-

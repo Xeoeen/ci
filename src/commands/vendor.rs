@@ -1,6 +1,5 @@
 use error::*;
-use std;
-use std::path::Path;
+use std::{self, path::Path};
 
 pub fn run(source: &Path) -> R<()> {
 	println!("#include <bits/stdc++.h>");
@@ -9,13 +8,10 @@ pub fn run(source: &Path) -> R<()> {
 		.stdout(std::process::Stdio::inherit())
 		.spawn()?
 		.wait()?;
-		if !status.success() {
-			return Err(
-				Error::from(
-					E::NonZeroStatus(status.code().unwrap_or(101))
-								.context(format_err!("Failed to run preprocessor"))
-				)
-			);
-		}
-		Ok(())
+	if !status.success() {
+		return Err(Error::from(
+			E::NonZeroStatus(status.code().unwrap_or(101)).context(format_err!("Failed to run preprocessor")),
+		));
+	}
+	Ok(())
 }

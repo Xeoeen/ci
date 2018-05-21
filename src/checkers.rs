@@ -1,12 +1,12 @@
+use error::*;
 use std;
 use strres::StrRes;
-use error::*;
 
 pub trait Checker {
 	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool>;
 }
 
-pub type CheckerBox = std::boxed::Box<Checker + 'static>;
+pub type CheckerBox = std::boxed::Box<Checker+'static>;
 
 pub struct CheckerDiffOut;
 impl Checker for CheckerDiffOut {
@@ -26,7 +26,8 @@ impl Checker for CheckerApp {
 				perfect_output.with_filename(|po_path| {
 					Ok(std::process::Command::new(&self.app)
 						.args(&[i_path, mo_path, po_path])
-						.status().context(format_err!("Running checker {}", self.app))?
+						.status()
+						.context(format_err!("Running checker {}", self.app))?
 						.success())
 				})
 			})

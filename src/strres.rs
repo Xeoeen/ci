@@ -1,9 +1,8 @@
-use std::fs::{File};
-use std::path::{Path, PathBuf};
-use std::io::{Read, Write};
-use std::process::{Command, Stdio};
-use tempfile::{NamedTempFile};
 use error::*;
+use std::{
+	fs::File, io::{Read, Write}, path::{Path, PathBuf}, process::{Command, Stdio}
+};
+use tempfile::NamedTempFile;
 
 pub enum StrRes {
 	InMemory(String),
@@ -13,7 +12,6 @@ pub enum StrRes {
 }
 
 impl StrRes {
-
 	pub fn from_path(path: &Path) -> StrRes {
 		StrRes::FilePath(path.to_owned())
 	}
@@ -34,6 +32,7 @@ impl StrRes {
 			&StrRes::Empty => Ok("".to_owned()),
 		}
 	}
+
 	pub fn with_filename<T, F: FnOnce(&Path) -> T>(&self, f: F) -> T {
 		match self {
 			&StrRes::FilePath(ref path) => f(path),
@@ -46,6 +45,7 @@ impl StrRes {
 			_ => unimplemented!("StrRes::with_filename"),
 		}
 	}
+
 	pub fn clone(&self) -> StrRes {
 		match self {
 			&StrRes::InMemory(ref s) => StrRes::InMemory(s.clone()),
@@ -54,6 +54,7 @@ impl StrRes {
 			_ => unimplemented!("StrRes::clone"),
 		}
 	}
+
 	pub fn print_to_stdout(&self) {
 		match self {
 			&StrRes::InMemory(ref s) => print!("{}", s),
@@ -61,9 +62,7 @@ impl StrRes {
 			_ => unimplemented!("StrRes::print_to_stdout"),
 		}
 	}
-
 }
-
 
 pub fn exec(executable: &Path, input: StrRes) -> R<StrRes> {
 	let (stdin_settings, to_write) = match input {
@@ -72,18 +71,14 @@ pub fn exec(executable: &Path, input: StrRes) -> R<StrRes> {
 		StrRes::FilePath(path) => (Stdio::from(File::open(path).unwrap()), None),
 		StrRes::Empty => (Stdio::null(), None),
 	};
-	let mut kid = Command::new(executable)
-		.stdin(stdin_settings)
-		.stdout(Stdio::piped())
-		.stderr(Stdio::inherit())
-		.spawn()?;
+	let mut kid = Command::new(executable).stdin(stdin_settings).stdout(Stdio::piped()).stderr(Stdio::inherit()).spawn()?;
 	if let Some(piped_input) = to_write {
 		kid.stdin.as_mut().ok_or(E::StdioFail)?.write_all(piped_input.as_bytes())?;
 	}
 	let out = kid.wait_with_output()?;
 
 	ensure!(out.status.success(), E::NonZeroStatus(out.status.code().unwrap_or(101)));
-	
+
 	let out_str = String::from_utf8(out.stdout)?;
 	Ok(StrRes::InMemory(out_str))
 }

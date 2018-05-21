@@ -1,7 +1,6 @@
-use std;
-use std::fs::{create_dir, File};
-use std::io::Write;
-use std::io;
+use std::{
+	self, fs::{create_dir, File}, io::{self, Write}
+};
 
 pub fn timefn<T, F: FnOnce() -> T>(f: F) -> (T, std::time::Duration) {
 	let inst = std::time::Instant::now();

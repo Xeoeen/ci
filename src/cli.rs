@@ -1,9 +1,9 @@
-use structopt;
 use checkers;
 use commands;
-use std::path::{PathBuf};
 use error::*;
 use sio2::Url;
+use std::path::PathBuf;
+use structopt;
 
 fn parse_checker(s: &str) -> R<Box<checkers::Checker>> {
 	if s == "\0CheckerDiffOut" {
@@ -19,7 +19,10 @@ fn parse_standard(s: &str) -> R<commands::build::CppVer> {
 	} else if s == "11" {
 		Ok(commands::build::CppVer::Cpp11)
 	} else {
-		Err(Error::from(ParseError { expected: "{17, 11}", found: s.to_owned() }))
+		Err(Error::from(ParseError {
+			expected: "{17, 11}",
+			found: s.to_owned(),
+		}))
 	}
 }
 
