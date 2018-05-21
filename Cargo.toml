@@ -17,4 +17,3 @@ keyring = "0.6"
 rpassword = "2"
 reqwest = "0.8.2"
 select = "0.4.2"
-sio2 = { git = "https://github.com/matcegla/sio2" }

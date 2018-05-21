@@ -1,7 +1,7 @@
 use checkers;
 use commands;
 use error::*;
-use sio2::Url;
+use reqwest::Url;
 use std::path::PathBuf;
 use structopt;
 

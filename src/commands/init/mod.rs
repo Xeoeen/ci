@@ -1,8 +1,7 @@
 mod codeforces;
-mod oioioi;
 
 use error::*;
-use sio2::Url;
+use reqwest::Url;
 use util::{demand_dir, writefile};
 
 pub struct Test {
@@ -25,10 +24,7 @@ pub fn run(url: Url) -> R<()> {
 	Ok(())
 }
 
-const MATCHERS: &[(&'static str, fn(&Url) -> Vec<Test>)] = &[
-	("codeforces.com", codeforces::Codeforces::download_tests),
-	("sio2.staszic.waw.pl", oioioi::Oioioi::download_tests),
-];
+const MATCHERS: &[(&'static str, fn(&Url) -> Vec<Test>)] = &[("codeforces.com", codeforces::Codeforces::download_tests)];
 
 fn acquire_tests(url: &Url) -> R<Vec<Test>> {
 	let domain = url.domain().unwrap();

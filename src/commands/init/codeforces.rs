@@ -1,7 +1,6 @@
 use super::{Site, Test};
-use reqwest;
+use reqwest::{self, Url};
 use select::{document::Document, predicate::Class};
-use sio2::Url;
 
 pub struct Codeforces;
 
