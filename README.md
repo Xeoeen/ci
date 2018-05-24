@@ -80,6 +80,6 @@ To use the command, a directory `/usr/share/ci/dummy-includes` must be created, 
 ### `ci init`
 
 ```bash
-ci init http://codeforces.com/contest/960/problem/D
+ci init https://codeforces.com/contest/960/problem/D
 ```
 To save time on entering example tests, this command will download and save them to `./tests/example` directory for you. Few task formats are supported.
