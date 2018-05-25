@@ -24,7 +24,9 @@ pub fn run(url: Url) -> R<()> {
 	Ok(())
 }
 
-const MATCHERS: &[(&'static str, fn(&Url) -> Vec<Test>)] = &[("codeforces.com", codeforces::Codeforces::download_tests)];
+const MATCHERS: &[(&'static str, fn(&Url) -> Vec<Test>)] = &[
+	("codeforces.com", codeforces::Codeforces::download_tests),
+];
 
 fn acquire_tests(url: &Url) -> R<Vec<Test>> {
 	let domain = url.domain().unwrap();
