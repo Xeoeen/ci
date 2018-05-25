@@ -11,6 +11,8 @@ extern crate pbr;
 extern crate reqwest;
 extern crate rpassword;
 extern crate select;
+extern crate sio2;
+extern crate tar;
 extern crate tempfile;
 extern crate walkdir;
 

@@ -1,4 +1,5 @@
 mod codeforces;
+mod sio2staszic;
 
 use error::*;
 use reqwest::Url;
@@ -26,6 +27,7 @@ pub fn run(url: Url) -> R<()> {
 
 const MATCHERS: &[(&'static str, fn(&Url) -> Vec<Test>)] = &[
 	("codeforces.com", codeforces::Codeforces::download_tests),
+	("sio2.staszic.waw.pl", sio2staszic::Sio2Staszic::download_tests),
 ];
 
 fn acquire_tests(url: &Url) -> R<Vec<Test>> {
