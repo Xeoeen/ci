@@ -22,19 +22,19 @@ impl Site for Sio2Staszic {
 		let tarfile = sess.get_url(&format!("https://sio2.staszic.waw.pl/c/{}/staszic/example-tests/{}/", contest, problem).parse().unwrap());
 		let mut ar = Archive::new(tarfile.as_slice());
 
-		let mut tests: HashMap<i64, (Option<String>, Option<String>)> = HashMap::new();
+		let mut tests: HashMap<String, (Option<String>, Option<String>)> = HashMap::new();
 		for file in ar.entries().unwrap() {
 			let mut file = file.unwrap();
-			let (num, ty) = {
+			let (name, ty) = {
 				let path = file.header().path().unwrap();
 				let paths = path.to_str().unwrap();
-				let num: i64 = paths[..paths.find('.').unwrap()].parse().unwrap();
+				let name: &str = &paths[..paths.find('.').unwrap()];
 				let ty: &str = &paths[paths.find('.').unwrap() + 1..];
-				(num, ty.to_owned())
+				(name.to_owned(), ty.to_owned())
 			};
 			let mut content = String::new();
 			file.read_to_string(&mut content).unwrap();
-			let entry = tests.entry(num).or_insert((None, None));
+			let entry = tests.entry(name).or_insert((None, None));
 			if ty == "in" {
 				entry.0 = Some(content);
 			} else if ty == "out" {
