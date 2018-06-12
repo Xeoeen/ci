@@ -5,7 +5,7 @@ use std::{
 	path::{Path, PathBuf},
 	process::{Command, Stdio},
 };
-use tempfile::NamedTempFile;
+use tempfile::{self, NamedTempFile};
 
 pub enum StrRes {
 	InMemory(String),
@@ -65,6 +65,23 @@ impl StrRes {
 			_ => unimplemented!("StrRes::print_to_stdout"),
 		}
 	}
+}
+
+#[test]
+fn double_strres_getstring_file() {
+	const TEST_STR: &str = "Hello, world!\n";
+	let f = tempfile::NamedTempFile::new().unwrap();
+	{
+		let mut f1 = f.reopen().unwrap();
+		f1.write_all(TEST_STR.as_bytes()).unwrap();
+		f1.flush().unwrap();
+	}
+	let s = StrRes::FileHandle(f.reopen().unwrap());
+	let r1 = s.get_string().unwrap();
+	let r2 = s.get_string().unwrap();
+	eprintln!("{:?} -> {:?} {:?}", TEST_STR, r1, r2);
+	assert_eq!(r1, TEST_STR);
+	assert_eq!(r2, TEST_STR);
 }
 
 pub fn exec(executable: &Path, input: StrRes) -> R<StrRes> {
