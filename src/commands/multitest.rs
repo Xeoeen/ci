@@ -1,15 +1,18 @@
-use checkers::CheckerBox;
+use checkers::Checker;
 use colored::*;
 use diagnose::diagnose_app;
 use error::*;
-use std::path::{Path, PathBuf};
+use std::{
+	borrow::Borrow,
+	path::{Path, PathBuf},
+};
 use strres::{exec, StrRes};
 use testing::{test_single, TestResult};
 use ui::timefmt;
 use util::timefn;
 
-pub fn run(gen: &Path, executables: &[PathBuf], checker: CheckerBox, count: Option<i64>) -> R<()> {
-	for ref executable in executables {
+pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option<i64>) -> R<()> {
+	for executable in executables.iter() {
 		diagnose_app(executable)?;
 	}
 	let mut i = 1;
@@ -30,8 +33,8 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: CheckerBox, count: Opti
 		};
 
 		let mut all_succeded = true;
-		for ref execi in &executables[1..] {
-			let (outi, ti) = test_single(execi, test_str.clone(), out1.clone(), checker.as_ref())?;
+		for execi in executables[1..].iter() {
+			let (outi, ti) = test_single(execi, test_str.clone(), out1.clone(), checker.borrow())?;
 			let msg = outi.apply_color(&timefmt(ti));
 			print_flush!(" {}", msg);
 
@@ -39,7 +42,7 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: CheckerBox, count: Opti
 				all_succeded = false;
 			}
 		}
-		println!("");
+		println!();
 		if !all_succeded {
 			if count.is_none() {
 				test_str.print_to_stdout();

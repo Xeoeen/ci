@@ -17,6 +17,6 @@ pub fn writefile(path: &str, content: &str) {
 pub fn demand_dir(path: &str) -> Result<(), io::Error> {
 	match create_dir(path) {
 		Err(ref e) if e.kind() == io::ErrorKind::AlreadyExists => Ok(()),
-		r @ _ => r,
+		r => r,
 	}
 }

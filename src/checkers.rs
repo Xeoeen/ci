@@ -6,8 +6,6 @@ pub trait Checker {
 	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool>;
 }
 
-pub type CheckerBox = std::boxed::Box<Checker+'static>;
-
 pub struct CheckerDiffOut;
 impl Checker for CheckerDiffOut {
 	fn check(&self, _input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool> {
@@ -54,12 +52,12 @@ fn equal_bew(a: &str, b: &str) -> bool {
 			j.next();
 		}
 	}
-	while let Some(c) = i.next() {
+	for c in i {
 		if !c.is_whitespace() {
 			return false;
 		}
 	}
-	while let Some(c) = j.next() {
+	for c in j {
 		if !c.is_whitespace() {
 			return false;
 		}

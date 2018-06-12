@@ -18,7 +18,7 @@ impl Site for Codeforces {
 			.collect();
 		for (kid, i) in samples.children().zip(0..) {
 			let mut parsed = String::new();
-			let testdiv = kid.children().skip(1).next().unwrap();
+			let testdiv = kid.children().nth(1).unwrap();
 			for (line, j) in testdiv.children().zip(0..) {
 				if j % 2 == 0 {
 					parsed += &(line.text() + "\n");

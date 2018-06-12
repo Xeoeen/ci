@@ -7,14 +7,14 @@ pub enum CppVer {
 }
 impl CppVer {
 	fn flag(&self) -> &'static str {
-		match self {
-			&CppVer::Cpp11 => "-std=c++11",
-			&CppVer::Cpp17 => "-std=c++17",
+		match *self {
+			CppVer::Cpp11 => "-std=c++11",
+			CppVer::Cpp17 => "-std=c++17",
 		}
 	}
 }
 
-fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) -> R<()> {
+fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: &CppVer) -> R<()> {
 	let mut args = vec![];
 	args.push(cppver.flag());
 	args.extend_from_slice(&["-Wall", "-Wextra", "-Wconversion", "-Wno-sign-conversion"]);
@@ -39,11 +39,11 @@ fn compile_cpp(source: &Path, output: &Path, release: bool, cppver: CppVer) -> R
 	Ok(())
 }
 
-pub fn run(source: &Path, release: bool, standard: CppVer) -> R<()> {
+pub fn run(source: &Path, release: bool, standard: &CppVer) -> R<()> {
 	ensure!(
-		source.extension().unwrap_or(OsStr::new("")) == "cpp",
+		source.extension().unwrap_or_else(|| OsStr::new("")) == "cpp",
 		E::InvalidFileExtension("cpp".to_string(), source.to_str().unwrap().to_string())
 	);
 	let executable = source.with_extension("e");
-	compile_cpp(&source, &executable, release, standard)
+	compile_cpp(&source, &executable, release, &standard)
 }

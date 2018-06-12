@@ -20,48 +20,48 @@ impl StrRes {
 	}
 
 	pub fn get_string(&self) -> R<String> {
-		match self {
-			&StrRes::InMemory(ref s) => Ok(s.clone()),
-			&StrRes::FileHandle(ref file) => {
+		match *self {
+			StrRes::InMemory(ref s) => Ok(s.clone()),
+			StrRes::FileHandle(ref file) => {
 				let mut f2 = file.clone();
 				let mut s = String::new();
 				f2.read_to_string(&mut s)?;
 				Ok(s)
 			},
-			&StrRes::FilePath(ref path) => {
+			StrRes::FilePath(ref path) => {
 				let file = File::open(path)?;
 				StrRes::FileHandle(file).get_string()
 			},
-			&StrRes::Empty => Ok("".to_owned()),
+			StrRes::Empty => Ok("".to_owned()),
 		}
 	}
 
 	pub fn with_filename<T, F: FnOnce(&Path) -> T>(&self, f: F) -> T {
-		match self {
-			&StrRes::FilePath(ref path) => f(path),
-			&StrRes::InMemory(ref s) => {
+		match *self {
+			StrRes::FilePath(ref path) => f(path),
+			StrRes::InMemory(ref s) => {
 				let mut tmp = NamedTempFile::new().unwrap();
 				write!(tmp, "{}", s).unwrap();
 				f(tmp.path())
 			},
-			&StrRes::Empty => f(Path::new("/dev/null")),
+			StrRes::Empty => f(Path::new("/dev/null")),
 			_ => unimplemented!("StrRes::with_filename"),
 		}
 	}
 
 	pub fn clone(&self) -> StrRes {
-		match self {
-			&StrRes::InMemory(ref s) => StrRes::InMemory(s.clone()),
-			&StrRes::FilePath(ref path) => StrRes::FilePath(path.clone()),
-			&StrRes::Empty => StrRes::Empty,
+		match *self {
+			StrRes::InMemory(ref s) => StrRes::InMemory(s.clone()),
+			StrRes::FilePath(ref path) => StrRes::FilePath(path.clone()),
+			StrRes::Empty => StrRes::Empty,
 			_ => unimplemented!("StrRes::clone"),
 		}
 	}
 
 	pub fn print_to_stdout(&self) {
-		match self {
-			&StrRes::InMemory(ref s) => print!("{}", s),
-			&StrRes::Empty => (),
+		match *self {
+			StrRes::InMemory(ref s) => print!("{}", s),
+			StrRes::Empty => (),
 			_ => unimplemented!("StrRes::print_to_stdout"),
 		}
 	}

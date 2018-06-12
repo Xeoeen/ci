@@ -13,18 +13,18 @@ pub enum TestResult {
 }
 impl TestResult {
 	pub fn format_long(&self) -> ColoredString {
-		self.apply_color(match self {
-			&TestResult::Accept => "ACCEPT       ",
-			&TestResult::WrongAnswer => "WRONG ANSWER ",
-			&TestResult::RuntimeError => "RUNTIME ERROR",
+		self.apply_color(match *self {
+			TestResult::Accept => "ACCEPT       ",
+			TestResult::WrongAnswer => "WRONG ANSWER ",
+			TestResult::RuntimeError => "RUNTIME ERROR",
 		})
 	}
 
 	pub fn apply_color(&self, s: &str) -> ColoredString {
-		match self {
-			&TestResult::Accept => s.green().bold(),
-			&TestResult::WrongAnswer => s.red().bold(),
-			&TestResult::RuntimeError => s.red().bold(),
+		match *self {
+			TestResult::Accept => s.green().bold(),
+			TestResult::WrongAnswer => s.red().bold(),
+			TestResult::RuntimeError => s.red().bold(),
 		}
 	}
 }

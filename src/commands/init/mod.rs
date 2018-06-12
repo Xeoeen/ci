@@ -14,7 +14,7 @@ pub trait Site {
 	fn download_tests(url: &Url) -> Vec<Test>;
 }
 
-pub fn run(url: Url) -> R<()> {
+pub fn run(url: &Url) -> R<()> {
 	demand_dir("./tests/").context("failed to create tests directory")?;
 	demand_dir("./tests/example/").context("failed to create tests directory")?;
 	let tests = acquire_tests(&url).context("failed to downloade tests")?;
@@ -25,7 +25,8 @@ pub fn run(url: Url) -> R<()> {
 	Ok(())
 }
 
-const MATCHERS: &[(&'static str, fn(&Url) -> Vec<Test>)] = &[
+type Downloader = fn(&Url) -> Vec<Test>;
+const MATCHERS: &[(&str, Downloader)] = &[
 	("codeforces.com", codeforces::Codeforces::download_tests),
 	("sio2.staszic.waw.pl", sio2staszic::Sio2Staszic::download_tests),
 ];
@@ -35,6 +36,6 @@ fn acquire_tests(url: &Url) -> R<Vec<Test>> {
 	MATCHERS
 		.iter()
 		.find(|&&(dom, _)| dom == domain)
-		.ok_or(Error::from(E::UnsupportedProblemSite(domain.to_owned())))
+		.ok_or_else(|| Error::from(E::UnsupportedProblemSite(domain.to_owned())))
 		.map(move |(_, f)| f(url))
 }

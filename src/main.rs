@@ -30,22 +30,23 @@ mod util;
 use cli::Args;
 use colored::Colorize;
 use error::*;
+use std::borrow::Borrow;
 use structopt::StructOpt;
 
 fn run() -> R<()> {
 	let args = Args::from_args();
 	match args {
-		Args::Build { source, release, standard } => commands::build::run(source.as_path(), release, standard),
+		Args::Build { source, release, standard } => commands::build::run(source.as_path(), release, &standard),
 		Args::Test {
 			executable,
 			testdir,
 			checker,
 			no_print_success,
-		} => commands::test::run(executable.as_path(), testdir.as_path(), checker, no_print_success),
-		Args::Multitest { gen, executables, checker, count } => commands::multitest::run(gen.as_path(), &executables, checker, count),
+		} => commands::test::run(executable.as_path(), testdir.as_path(), checker.borrow(), no_print_success),
+		Args::Multitest { gen, executables, checker, count } => commands::multitest::run(gen.as_path(), &executables, checker.as_ref(), count),
 		Args::Vendor { source } => commands::vendor::run(source.as_path()),
 		Args::InternalAutocomplete { shell } => commands::genautocomplete::run(shell),
-		Args::Init { url } => commands::init::run(url),
+		Args::Init { url } => commands::init::run(&url),
 	}
 }
 

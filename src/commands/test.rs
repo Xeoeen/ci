@@ -1,10 +1,10 @@
-use checkers::CheckerBox;
+use checkers::Checker;
 use colored::*;
 use diagnose::diagnose_app;
 use error::*;
 use itertools::{self, Itertools};
 use pbr;
-use std::{self, cmp::Ordering, path::Path};
+use std::{self, borrow::Borrow, cmp::Ordering, path::Path};
 use strres::StrRes;
 use testing::{test_single, TestResult};
 use ui::timefmt;
@@ -51,14 +51,14 @@ fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>
 	Box::new(tests.into_iter())
 }
 
-pub fn run(executable: &Path, testdir: &Path, checker: CheckerBox, no_print_success: bool) -> R<()> {
+pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_success: bool) -> R<()> {
 	ensure!(testdir.exists(), err_msg("test directory does not exist"));
 	diagnose_app(&executable)?;
 	let test_count = recursive_find_tests(&testdir).count();
 	let mut pb = pbr::ProgressBar::new(test_count as u64);
-	for ref in_path in recursive_find_tests(&testdir) {
+	for in_path in recursive_find_tests(&testdir) {
 		let out_path = in_path.with_extension("out");
-		let (outcome, timing) = test_single(&executable, StrRes::from_path(in_path), StrRes::from_path(&out_path), checker.as_ref())?;
+		let (outcome, timing) = test_single(&executable, StrRes::from_path(&in_path), StrRes::from_path(&out_path), checker.borrow())?;
 		if outcome != TestResult::Accept || !no_print_success {
 			let rstr = outcome.format_long();
 			let timestr = timefmt(timing).blue().bold();
