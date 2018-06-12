@@ -1,6 +1,9 @@
 use error::*;
 use std::{
-	fs::File, io::{Read, Write}, path::{Path, PathBuf}, process::{Command, Stdio}
+	fs::File,
+	io::{Read, Write},
+	path::{Path, PathBuf},
+	process::{Command, Stdio},
 };
 use tempfile::NamedTempFile;
 
