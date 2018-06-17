@@ -5,7 +5,7 @@ use std::{
 	path::{Path, PathBuf},
 	process::{Command, Stdio},
 };
-use tempfile::{self, NamedTempFile};
+use tempfile::NamedTempFile;
 
 pub enum StrRes {
 	InMemory(String),
@@ -70,7 +70,7 @@ impl StrRes {
 #[test]
 fn double_strres_getstring_file() {
 	const TEST_STR: &str = "Hello, world!\n";
-	let f = tempfile::NamedTempFile::new().unwrap();
+	let f = NamedTempFile::new().unwrap();
 	{
 		let mut f1 = f.reopen().unwrap();
 		f1.write_all(TEST_STR.as_bytes()).unwrap();
