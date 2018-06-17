@@ -1,6 +1,6 @@
 [package]
 name = "ci"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Mateusz Cegiełka <mateusz@cegla.net>"]
 description = "CLI for building and testing programming contest tasks"
 
