@@ -26,21 +26,24 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option
 
 		let out1 = if let Ok(out1) = out1 {
 			print_flush!(" {}", timefmt(t1).green().bold());
-			out1
+			Some(out1)
 		} else {
-			print_flush!(" {}\n", timefmt(t1).red().bold());
-			test_str.print_to_stdout();
-			break;
+			print_flush!(" {}", timefmt(t1).red().bold());
+			None
 		};
 
-		let mut all_succeded = true;
+		let mut all_succeded = out1.is_some();
 		for execi in executables[1..].iter() {
-			let (outi, ti) = test_single(execi, test_str.clone(), out1.clone(), checker.borrow())?;
-			let msg = outi.apply_color(&timefmt(ti));
-			print_flush!(" {}", msg);
+			if let Some(perfout) = out1.as_ref() {
+				let (outi, ti) = test_single(execi, test_str.clone(), perfout.clone(), checker.borrow())?;
+				let msg = outi.apply_color(&timefmt(ti));
+				print_flush!(" {}", msg);
 
-			if outi != TestResult::Accept {
-				all_succeded = false;
+				if outi != TestResult::Accept {
+					all_succeded = false;
+				}
+			} else {
+				print_flush!(" {}", "-.--s".yellow().bold());
 			}
 		}
 		println!();
