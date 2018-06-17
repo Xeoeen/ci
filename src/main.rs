@@ -29,6 +29,7 @@ mod util;
 
 use cli::Args;
 use colored::Colorize;
+use commands::build::Codegen;
 use error::*;
 use std::borrow::Borrow;
 use structopt::StructOpt;
@@ -36,7 +37,20 @@ use structopt::StructOpt;
 fn run() -> R<()> {
 	let args = Args::from_args();
 	match args {
-		Args::Build { source, release, standard } => commands::build::run(source.as_path(), release, &standard),
+		Args::Build {
+			source,
+			release,
+			profile,
+			standard,
+		} => {
+			let codegen = match (release, profile) {
+				(false, false) => Codegen::Debug,
+				(true, false) => Codegen::Release,
+				(false, true) => Codegen::Profile,
+				(true, true) => return Err(format_err!("both --release and --profile specified")),
+			};
+			commands::build::run(source.as_path(), &codegen, &standard)
+		},
 		Args::Test {
 			executable,
 			testdir,

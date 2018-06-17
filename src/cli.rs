@@ -33,8 +33,11 @@ pub enum Args {
 	Build {
 		#[structopt(name = "SOURCE", parse(from_os_str), help = "Source file path")]
 		source: PathBuf,
+		// TODO force structopt so that these are mutually exclusive
 		#[structopt(short = "O", long = "release", help = "Enable optimizations")]
 		release: bool,
+		#[structopt(long = "profile", help = "Enable profiling")]
+		profile: bool,
 		#[structopt(long = "standard", parse(try_from_str = "parse_standard"), default_value = "17", help = "C++ standard")]
 		standard: commands::build::CppVer,
 	},
