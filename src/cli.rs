@@ -64,7 +64,7 @@ pub enum Args {
 		#[structopt(short = "n", long = "count", help = "Test case count")]
 		count: Option<i64>,
 		// TODO force structopt to require count
-		#[structopt(long = "fitness", parse(try_from_str = "fitness::parse_fitness"), default_value = "!bytelen", help = "Test fitness function")]
+		#[structopt(long = "fitness", parse(try_from_str = "fitness::parse_fitness"), default_value = "@bytelen", help = "Test fitness function")]
 		fitness: Box<fitness::Fitness>,
 	},
 	#[structopt(name = "vendor", about = "Merge solution and its dependencies into single source file")]
