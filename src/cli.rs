@@ -9,7 +9,7 @@ fn parse_checker(s: &str) -> R<Box<checkers::Checker>> {
 	if s == "\0CheckerDiffOut" {
 		Ok(Box::new(checkers::CheckerDiffOut {}))
 	} else {
-		Ok(Box::new(checkers::CheckerApp { app: s.to_owned() }))
+		Ok(Box::new(checkers::CheckerApp::new(s.to_owned())?))
 	}
 }
 

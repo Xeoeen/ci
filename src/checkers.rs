@@ -1,5 +1,6 @@
+use diagnose::diagnose_app;
 use error::*;
-use std;
+use std::{self, path::Path};
 use strres::StrRes;
 
 pub trait Checker {
@@ -14,9 +15,15 @@ impl Checker for CheckerDiffOut {
 }
 
 pub struct CheckerApp {
-	pub app: String,
+	app: String,
 }
 
+impl CheckerApp {
+	pub fn new(app: String) -> R<CheckerApp> {
+		diagnose_app(Path::new(&app))?;
+		Ok(CheckerApp { app })
+	}
+}
 impl Checker for CheckerApp {
 	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool> {
 		input.with_filename(|i_path| {
