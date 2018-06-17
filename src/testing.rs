@@ -10,6 +10,7 @@ pub enum TestResult {
 	Accept,
 	WrongAnswer,
 	RuntimeError,
+	IgnoredNoOut,
 }
 impl TestResult {
 	pub fn format_long(&self) -> ColoredString {
@@ -17,6 +18,7 @@ impl TestResult {
 			TestResult::Accept => "ACCEPT       ",
 			TestResult::WrongAnswer => "WRONG ANSWER ",
 			TestResult::RuntimeError => "RUNTIME ERROR",
+			TestResult::IgnoredNoOut => "IGNORED      ",
 		})
 	}
 
@@ -25,6 +27,7 @@ impl TestResult {
 			TestResult::Accept => s.green().bold(),
 			TestResult::WrongAnswer => s.red().bold(),
 			TestResult::RuntimeError => s.red().bold(),
+			TestResult::IgnoredNoOut => s.yellow().bold(),
 		}
 	}
 }

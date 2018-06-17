@@ -58,10 +58,15 @@ pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_succes
 	let mut pb = pbr::ProgressBar::new(test_count as u64);
 	for in_path in recursive_find_tests(&testdir) {
 		let out_path = in_path.with_extension("out");
-		let (outcome, timing) = test_single(&executable, StrRes::from_path(&in_path), StrRes::from_path(&out_path), checker.borrow())?;
+		let (outcome, timing) = if out_path.exists() {
+			let (outcome, timing) = test_single(&executable, StrRes::from_path(&in_path), StrRes::from_path(&out_path), checker.borrow())?;
+			(outcome, Some(timing))
+		} else {
+			(TestResult::IgnoredNoOut, None)
+		};
 		if outcome != TestResult::Accept || !no_print_success {
 			let rstr = outcome.format_long();
-			let timestr = timefmt(timing).blue().bold();
+			let timestr = timing.map(|timing| timefmt(timing).blue().bold()).unwrap_or("-.--s".blue().bold());
 			pb_interwrite!(pb, "{} {} {}", rstr, timestr, in_path.display());
 		}
 		pb.inc();
