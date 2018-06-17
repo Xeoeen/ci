@@ -1,6 +1,7 @@
 use checkers;
 use commands;
 use error::*;
+use fitness;
 use reqwest::Url;
 use std::path::PathBuf;
 use structopt;
@@ -62,6 +63,9 @@ pub enum Args {
 		checker: Box<checkers::Checker>,
 		#[structopt(short = "n", long = "count", help = "Test case count")]
 		count: Option<i64>,
+		// TODO force structopt to require count
+		#[structopt(long = "fitness", parse(try_from_str = "fitness::parse_fitness"), default_value = "!bytelen", help = "Test fitness function")]
+		fitness: Box<fitness::Fitness>,
 	},
 	#[structopt(name = "vendor", about = "Merge solution and its dependencies into single source file")]
 	Vendor {

@@ -25,6 +25,7 @@ mod testing;
 mod ui;
 mod cli;
 mod commands;
+mod fitness;
 mod util;
 
 use cli::Args;
@@ -57,7 +58,13 @@ fn run() -> R<()> {
 			checker,
 			no_print_success,
 		} => commands::test::run(executable.as_path(), testdir.as_path(), checker.borrow(), no_print_success),
-		Args::Multitest { gen, executables, checker, count } => commands::multitest::run(gen.as_path(), &executables, checker.as_ref(), count),
+		Args::Multitest {
+			gen,
+			executables,
+			checker,
+			count,
+			fitness,
+		} => commands::multitest::run(gen.as_path(), &executables, checker.as_ref(), count, fitness.borrow()),
 		Args::Vendor { source } => commands::vendor::run(source.as_path()),
 		Args::InternalAutocomplete { shell } => commands::genautocomplete::run(shell),
 		Args::Init { url } => commands::init::run(&url),

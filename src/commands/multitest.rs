@@ -2,6 +2,7 @@ use checkers::Checker;
 use colored::*;
 use diagnose::diagnose_app;
 use error::*;
+use fitness::Fitness;
 use std::{
 	borrow::Borrow,
 	path::{Path, PathBuf},
@@ -11,7 +12,7 @@ use testing::{test_single, TestResult};
 use ui::timefmt;
 use util::timefn;
 
-pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option<i64>) -> R<()> {
+pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option<i64>, fitness: &Fitness) -> R<()> {
 	for executable in executables.iter() {
 		diagnose_app(executable)?;
 	}
@@ -48,7 +49,7 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option
 				test_str.print_to_stdout();
 				break;
 			} else {
-				let fit = fitness(&test_str);
+				let fit = fitness.fitness(test_str.clone())?;
 				if best.as_ref().map(|&(_, bfit)| fit > bfit).unwrap_or(true) {
 					best = Some((test_str, fit));
 				}
@@ -64,9 +65,4 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option
 	}
 
 	Ok(())
-}
-
-fn fitness(res: &StrRes) -> i64 {
-	let s = res.get_string().unwrap();
-	-(s.len() as i64)
 }

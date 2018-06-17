@@ -66,7 +66,12 @@ Instead of comparing char-by-char minus whitespace, this uses a checker like `--
 ```bash
 ci multitest ./kitties-gen.py ./kitties-brut.e ./kitties.e ./kitties-alternative.e -n 200
 ```
-Instead of breaking on first failing test, this will run 200 tests and only print one with greatest fitness. Fitness function is hardcoded to be `- (test char count)` (customizable fitness to be added).
+Instead of breaking on first failing test, this will run 200 tests and only print one with greatest fitness. Fitness function is `- (test char count)` by default.
+
+```bash
+ci multitest ./kitties-gen.py ./kitties-brut.e ./kitties.e -n 200 --fitness ./kitties-fit.e
+```
+Uses a supplied fitness function instead of the default. `@bytelen` is a special value that is `-(test char count)`.
 
 ### `ci vendor`
 
