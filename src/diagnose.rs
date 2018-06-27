@@ -1,6 +1,6 @@
-use colored::*;
 use error::*;
 use std::{self, io::Write, path::Path, process::Command};
+use term_painter::{Color::Red, ToStyle};
 
 pub fn diagnose_app(app: &Path) -> R<()> {
 	std::fs::metadata(app).context(format_err!("Failed to execute {:?}", app))?;
@@ -21,7 +21,7 @@ fn has_extension(path: &Path, ext: &str) -> bool {
 }
 
 fn warn(s: &str) {
-	eprint!("{} {}. Continue? ", "WARNING".red().bold(), s);
+	eprint!("{} {}. Continue? ", Red.bold().paint("WARNING"), s);
 	std::io::stderr().flush().unwrap();
 	std::io::stdin().read_line(&mut String::new()).unwrap();
 }

@@ -4,7 +4,6 @@ extern crate structopt;
 extern crate failure;
 #[macro_use]
 extern crate failure_derive;
-extern crate colored;
 extern crate itertools;
 extern crate keyring;
 extern crate pbr;
@@ -14,6 +13,7 @@ extern crate select;
 extern crate sio2;
 extern crate tar;
 extern crate tempfile;
+extern crate term_painter;
 extern crate walkdir;
 
 mod checkers;
@@ -29,11 +29,14 @@ mod fitness;
 mod util;
 
 use cli::Args;
-use colored::Colorize;
 use commands::build::Codegen;
 use error::*;
 use std::borrow::Borrow;
 use structopt::StructOpt;
+use term_painter::{
+	Color::{Red, Yellow},
+	ToStyle,
+};
 
 fn run() -> R<()> {
 	let args = Args::from_args();
@@ -73,8 +76,8 @@ fn run() -> R<()> {
 
 fn main() {
 	if let Err(e) = run() {
-		let error_prefix = "error".red().bold();
-		let cause_prefix = "caused by".yellow().bold();
+		let error_prefix = Red.bold().paint("error");
+		let cause_prefix = Yellow.bold().paint("caused by");
 		println!("{}: {}", error_prefix, e);
 		for cause in e.causes().skip(1) {
 			println!("{}: {}", cause_prefix, cause);

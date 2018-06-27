@@ -1,8 +1,11 @@
 use checkers::Checker;
-use colored::*;
 use error::*;
 use std::{self, path::Path};
 use strres::{exec, StrRes};
+use term_painter::{
+	Color::{Green, Red, Yellow},
+	Painted, ToStyle,
+};
 use util::timefn;
 
 #[derive(PartialEq, Eq)]
@@ -13,7 +16,7 @@ pub enum TestResult {
 	IgnoredNoOut,
 }
 impl TestResult {
-	pub fn format_long(&self) -> ColoredString {
+	pub fn format_long(&self) -> Painted<&'static str> {
 		self.apply_color(match *self {
 			TestResult::Accept => "ACCEPT       ",
 			TestResult::WrongAnswer => "WRONG ANSWER ",
@@ -22,13 +25,14 @@ impl TestResult {
 		})
 	}
 
-	pub fn apply_color(&self, s: &str) -> ColoredString {
+	pub fn apply_color<'a>(&self, s: &'a str) -> Painted<&'a str> {
 		match *self {
-			TestResult::Accept => s.green().bold(),
-			TestResult::WrongAnswer => s.red().bold(),
-			TestResult::RuntimeError => s.red().bold(),
-			TestResult::IgnoredNoOut => s.yellow().bold(),
-		}
+			TestResult::Accept => Green,
+			TestResult::WrongAnswer => Red,
+			TestResult::RuntimeError => Red,
+			TestResult::IgnoredNoOut => Yellow,
+		}.bold()
+			.paint(s)
 	}
 }
 pub fn test_single(executable: &Path, input: StrRes, perfect_output: StrRes, checker: &Checker) -> R<(TestResult, std::time::Duration)> {

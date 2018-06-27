@@ -1,11 +1,16 @@
 use checkers::Checker;
-use colored::*;
 use diagnose::diagnose_app;
 use error::*;
 use itertools::{self, Itertools};
 use pbr;
-use std::{self, borrow::Borrow, cmp::Ordering, path::Path};
+use std::{
+	self,
+	borrow::{Borrow, Cow},
+	cmp::Ordering,
+	path::Path,
+};
 use strres::StrRes;
+use term_painter::{Color::Blue, ToStyle};
 use testing::{test_single, TestResult};
 use ui::timefmt;
 use walkdir;
@@ -66,7 +71,7 @@ pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_succes
 		};
 		if outcome != TestResult::Accept || !no_print_success {
 			let rstr = outcome.format_long();
-			let timestr = timing.map(|timing| timefmt(timing).blue().bold()).unwrap_or("-.--s".blue().bold());
+			let timestr = Blue.bold().paint(timing.map(|timing| Cow::Owned(timefmt(timing))).unwrap_or(Cow::Borrowed("-.--s")));
 			pb_interwrite!(pb, "{} {} {}", rstr, timestr, in_path.display());
 		}
 		pb.inc();

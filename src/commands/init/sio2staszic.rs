@@ -1,5 +1,4 @@
 use super::{Site, Test};
-use colored::Colorize;
 use keyring::{Keyring, KeyringError};
 use reqwest::Url;
 use rpassword;
@@ -9,6 +8,7 @@ use std::{
 	io::{stderr, stdin, Read, Write},
 };
 use tar::Archive;
+use term_painter::{Color::Red, ToStyle};
 
 pub struct Sio2Staszic;
 
@@ -67,7 +67,7 @@ fn read_auth(domain: &str) -> (String, String) {
 			match e {
 				KeyringError::NoPasswordFound => (),
 				KeyringError::NoBackendFound => {
-					eprintln!("{}", "No keyring found, quit using Arch".red().bold());
+					eprintln!("{}", Red.bold().paint("No keyring found, quit using Arch"));
 				},
 				_ => Err(e).unwrap(),
 			}

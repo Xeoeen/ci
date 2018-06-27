@@ -1,5 +1,4 @@
 use checkers::Checker;
-use colored::*;
 use diagnose::diagnose_app;
 use error::*;
 use fitness::Fitness;
@@ -8,6 +7,10 @@ use std::{
 	path::{Path, PathBuf},
 };
 use strres::{exec, StrRes};
+use term_painter::{
+	Color::{Green, Red, Yellow},
+	ToStyle,
+};
 use testing::{test_single, TestResult};
 use ui::timefmt;
 use util::timefn;
@@ -25,10 +28,10 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option
 		let (out1, t1) = timefn(|| exec(Path::new(&executables[0]), test_str.clone()));
 
 		let out1 = if let Ok(out1) = out1 {
-			print_flush!(" {}", timefmt(t1).green().bold());
+			print_flush!(" {}", Green.bold().paint(timefmt(t1)));
 			Some(out1)
 		} else {
-			print_flush!(" {}", timefmt(t1).red().bold());
+			print_flush!(" {}", Red.bold().paint(timefmt(t1)));
 			None
 		};
 
@@ -36,14 +39,15 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option
 		for execi in executables[1..].iter() {
 			if let Some(perfout) = out1.as_ref() {
 				let (outi, ti) = test_single(execi, test_str.clone(), perfout.clone(), checker.borrow())?;
-				let msg = outi.apply_color(&timefmt(ti));
+				let rawmsg = timefmt(ti);
+				let msg = outi.apply_color(&rawmsg);
 				print_flush!(" {}", msg);
 
 				if outi != TestResult::Accept {
 					all_succeded = false;
 				}
 			} else {
-				print_flush!(" {}", "-.--s".yellow().bold());
+				print_flush!(" {}", Yellow.bold().paint("-.--s"));
 			}
 		}
 		println!();
