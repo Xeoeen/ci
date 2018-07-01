@@ -1,6 +1,6 @@
 use checkers::Checker;
 use error::*;
-use std::{self, path::Path};
+use std::{self, path::Path, time::Duration};
 use strres::{exec, StrRes};
 use term_painter::{
 	Color::{Green, Red, Yellow},
@@ -35,8 +35,8 @@ impl TestResult {
 			.paint(s)
 	}
 }
-pub fn test_single(executable: &Path, input: StrRes, perfect_output: StrRes, checker: &Checker) -> R<(TestResult, std::time::Duration)> {
-	let (my_output, timing) = timefn(|| exec(executable, input.clone()));
+pub fn test_single(executable: &Path, input: StrRes, perfect_output: StrRes, checker: &Checker, time_limit: Option<&Duration>) -> R<(TestResult, std::time::Duration)> {
+	let (my_output, timing) = timefn(|| exec(executable, input.clone(), time_limit));
 	Ok((
 		if let Ok(output) = my_output {
 			if checker.check(input, output, perfect_output)? {

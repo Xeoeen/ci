@@ -3,7 +3,7 @@ use commands;
 use error::*;
 use fitness;
 use reqwest::Url;
-use std::path::PathBuf;
+use std::{path::PathBuf, time::Duration};
 use structopt;
 
 fn parse_checker(s: &str) -> R<Box<checkers::Checker>> {
@@ -25,6 +25,19 @@ fn parse_standard(s: &str) -> R<commands::build::CppVer> {
 			found: s.to_owned(),
 		}))
 	}
+}
+
+fn parse_duration(s: &str) -> R<Duration> {
+	let sufstart = s.find(|c: char| !c.is_digit(10)).ok_or_else(|| format_err!("time unit not found(for example, 10s)"))?;
+	let n = s[..sufstart].parse()?;
+	let suf = &s[sufstart..];
+	Ok(match suf {
+		"h" => Duration::from_secs(n * 60 * 60),
+		"min" => Duration::from_secs(n * 60),
+		"s" => Duration::from_secs(n),
+		"ms" => Duration::from_millis(n),
+		_ => return Err(format_err!("unsupported time unit {} (supported: h, min, s, ms)", suf)),
+	})
 }
 
 #[derive(StructOpt)]
@@ -66,6 +79,8 @@ pub enum Args {
 		// TODO force structopt to require count
 		#[structopt(long = "fitness", parse(try_from_str = "fitness::parse_fitness"), default_value = "@bytelen", help = "Test fitness function")]
 		fitness: Box<fitness::Fitness>,
+		#[structopt(long = "time-limit", parse(try_from_str = "parse_duration"), help = "Program execution time limit")]
+		time_limit: Option<Duration>,
 	},
 	#[structopt(name = "vendor", about = "Merge solution and its dependencies into single source file")]
 	Vendor {

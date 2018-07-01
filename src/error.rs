@@ -12,6 +12,8 @@ pub enum E {
 	InvalidFileExtension(String, String),
 	#[fail(display = "unsupported problem site {}", _0)]
 	UnsupportedProblemSite(String),
+	#[fail(display = "time limit exceeded")]
+	TimeLimitExceeded,
 }
 
 #[derive(Debug, Fail)]

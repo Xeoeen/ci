@@ -64,7 +64,7 @@ pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_succes
 	for in_path in recursive_find_tests(&testdir) {
 		let out_path = in_path.with_extension("out");
 		let (outcome, timing) = if out_path.exists() {
-			let (outcome, timing) = test_single(&executable, StrRes::from_path(&in_path), StrRes::from_path(&out_path), checker.borrow())?;
+			let (outcome, timing) = test_single(&executable, StrRes::from_path(&in_path), StrRes::from_path(&out_path), checker.borrow(), None)?;
 			(outcome, Some(timing))
 		} else {
 			(TestResult::IgnoredNoOut, None)
