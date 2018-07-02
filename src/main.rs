@@ -14,6 +14,7 @@ extern crate sio2;
 extern crate tar;
 extern crate tempfile;
 extern crate term_painter;
+extern crate wait_timeout;
 extern crate walkdir;
 
 mod checkers;

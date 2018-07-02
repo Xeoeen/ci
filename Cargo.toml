@@ -19,3 +19,4 @@ reqwest = "0.8.2"
 select = "0.4.2"
 sio2 = { git = "https://github.com/matcegla/sio2" }
 tar = "0.4"
+wait-timeout = "0.1.5"

@@ -1,13 +1,13 @@
 use error::*;
 use std::{
 	fs::File,
-	io::{Read, Write},
+	io::{self, Read, Write},
 	path::{Path, PathBuf},
 	process::{self, Command, Stdio},
-	thread::sleep,
-	time::{Duration, Instant},
+	time::Duration,
 };
 use tempfile::NamedTempFile;
+use wait_timeout::ChildExt;
 
 pub enum StrRes {
 	InMemory(String),
@@ -97,38 +97,28 @@ pub fn exec(executable: &Path, input: StrRes, time_limit: Option<&Duration>) -> 
 	if let Some(piped_input) = to_write {
 		kid.stdin.as_mut().ok_or(E::StdioFail)?.write_all(piped_input.as_bytes())?;
 	}
-	let out = match time_limit {
-		Some(tl) => {
-			let started = Instant::now();
-			loop {
-				let currt = Instant::now();
-				if let Some(status) = kid.try_wait()? {
-					let process::Child { stdout, stderr, .. } = kid;
-					let mut stdout2 = Vec::new();
-					let mut stderr2 = Vec::new();
-					if let Some(mut stdos) = stdout {
-						stdos.read_to_end(&mut stdout2)?;
-					}
-					if let Some(mut stdes) = stderr {
-						stdes.read_to_end(&mut stderr2)?;
-					}
-					break process::Output {
-						status,
-						stdout: stdout2,
-						stderr: stderr2,
-					};
-				}
-				if currt - started > *tl {
-					return Err(From::from(E::TimeLimitExceeded));
-				}
-				sleep(Duration::from_micros(10));
-			}
-		},
-		None => kid.wait_with_output()?,
+	let (success, excode, stdout) = if let Some(tl) = time_limit {
+		if let Some(status) = kid.wait_timeout(tl.clone())? {
+			let process::Child { stdout, .. } = kid;
+			(status.success(), status.code(), endread(stdout.unwrap())?)
+		} else {
+			kid.kill()?;
+			kid.wait()?;
+			return Err(From::from(E::TimeLimitExceeded));
+		}
+	} else {
+		let process::Output { status, stdout, .. } = kid.wait_with_output()?;
+		(status.success(), status.code(), stdout)
 	};
 
-	ensure!(out.status.success(), E::NonZeroStatus(out.status.code().unwrap_or(101)));
+	ensure!(success, E::NonZeroStatus(excode.unwrap_or(101)));
 
-	let out_str = String::from_utf8(out.stdout)?;
+	let out_str = String::from_utf8(stdout)?;
 	Ok(StrRes::InMemory(out_str))
+}
+
+fn endread<RE: Read>(mut re: RE) -> io::Result<Vec<u8>> {
+	let mut buf = Vec::new();
+	re.read_to_end(&mut buf)?;
+	Ok(buf)
 }
