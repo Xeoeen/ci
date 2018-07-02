@@ -1,5 +1,5 @@
 use checkers::Checker;
-use diagnose::diagnose_app;
+use diagnose::*;
 use error::*;
 use fitness::Fitness;
 use std::{
@@ -20,6 +20,7 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option
 	for executable in executables.iter() {
 		diagnose_app(executable)?;
 	}
+	diagnose_checker(checker)?;
 	let mut i = 1;
 	let mut best: Option<(StrRes, i64)> = None;
 	while count.map(|n| i <= n).unwrap_or(true) {

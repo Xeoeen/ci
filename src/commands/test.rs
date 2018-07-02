@@ -1,5 +1,5 @@
 use checkers::Checker;
-use diagnose::diagnose_app;
+use diagnose::*;
 use error::*;
 use itertools::{self, Itertools};
 use pbr;
@@ -59,6 +59,7 @@ fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>
 pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_success: bool) -> R<()> {
 	ensure!(testdir.exists(), err_msg("test directory does not exist"));
 	diagnose_app(&executable)?;
+	diagnose_checker(checker)?;
 	let test_count = recursive_find_tests(&testdir).count();
 	let mut pb = pbr::ProgressBar::new(test_count as u64);
 	for in_path in recursive_find_tests(&testdir) {

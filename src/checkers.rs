@@ -5,12 +5,17 @@ use strres::StrRes;
 
 pub trait Checker {
 	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool>;
+	fn is_default(&self) -> bool;
 }
 
 pub struct CheckerDiffOut;
 impl Checker for CheckerDiffOut {
 	fn check(&self, _input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool> {
 		Ok(equal_bew(&my_output.get_string()?, &perfect_output.get_string()?))
+	}
+
+	fn is_default(&self) -> bool {
+		true
 	}
 }
 
@@ -37,6 +42,10 @@ impl Checker for CheckerApp {
 				})
 			})
 		})
+	}
+
+	fn is_default(&self) -> bool {
+		false
 	}
 }
 

@@ -1,3 +1,4 @@
+use checkers::Checker;
 use error::*;
 use std::{self, io::Write, path::Path, process::Command};
 use term_painter::{Color::Red, ToStyle};
@@ -13,6 +14,19 @@ pub fn diagnose_app(app: &Path) -> R<()> {
 	}
 
 	Command::new(app).spawn().context(format_err!("Failed to execute {:?}", app))?.kill()?;
+	Ok(())
+}
+
+pub fn diagnose_checker(checker: &Checker) -> R<()> {
+	static TYPICAL_CHECKER_FILES: [&str; 3] = ["checker.cpp", "checker.e", "checker.py"];
+	if checker.is_default() {
+		for tcf in &TYPICAL_CHECKER_FILES {
+			if Path::new(tcf).exists() {
+				warn(&format!("No checker specified, but file {} present", tcf));
+				break;
+			}
+		}
+	}
 	Ok(())
 }
 
