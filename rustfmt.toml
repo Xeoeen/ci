@@ -1,5 +1,5 @@
 indent_style = "Block"
-use_small_heuristics = true
+use_small_heuristics = "Default"
 binop_separator = "Front"
 combine_control_expr = true
 # comment_width

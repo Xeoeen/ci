@@ -35,8 +35,7 @@ use error::*;
 use std::borrow::Borrow;
 use structopt::StructOpt;
 use term_painter::{
-	Color::{Red, Yellow},
-	ToStyle,
+	Color::{Red, Yellow}, ToStyle
 };
 
 fn run() -> R<()> {

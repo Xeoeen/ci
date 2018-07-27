@@ -4,10 +4,7 @@ use error::*;
 use itertools::{self, Itertools};
 use pbr;
 use std::{
-	self,
-	borrow::{Borrow, Cow},
-	cmp::Ordering,
-	path::Path,
+	self, borrow::{Borrow, Cow}, cmp::Ordering, path::Path
 };
 use strres::StrRes;
 use term_painter::{Color::Blue, ToStyle};

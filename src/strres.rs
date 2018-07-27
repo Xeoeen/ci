@@ -1,10 +1,6 @@
 use error::*;
 use std::{
-	fs::File,
-	io::{self, Read, Write},
-	path::{Path, PathBuf},
-	process::{self, Command, Stdio},
-	time::Duration,
+	fs::File, io::{self, Read, Write}, path::{Path, PathBuf}, process::{self, Command, Stdio}, time::Duration
 };
 use tempfile::NamedTempFile;
 use wait_timeout::ChildExt;

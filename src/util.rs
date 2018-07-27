@@ -1,7 +1,5 @@
 use std::{
-	self,
-	fs::{create_dir, File},
-	io::{self, Write},
+	self, fs::{create_dir, File}, io::{self, Write}
 };
 
 pub fn timefn<T, F: FnOnce() -> T>(f: F) -> (T, std::time::Duration) {

@@ -4,8 +4,7 @@ use reqwest::Url;
 use rpassword;
 use sio2;
 use std::{
-	collections::HashMap,
-	io::{stderr, stdin, Read, Write},
+	collections::HashMap, io::{stderr, stdin, Read, Write}
 };
 use tar::Archive;
 use term_painter::{Color::Red, ToStyle};

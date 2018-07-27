@@ -3,8 +3,7 @@ use error::*;
 use std::{self, path::Path, time::Duration};
 use strres::{exec, StrRes};
 use term_painter::{
-	Color::{Green, Red, Yellow},
-	Painted, ToStyle,
+	Color::{Green, Red, Yellow}, Painted, ToStyle
 };
 use util::timefn;
 

@@ -3,14 +3,11 @@ use diagnose::*;
 use error::*;
 use fitness::Fitness;
 use std::{
-	borrow::Borrow,
-	path::{Path, PathBuf},
-	time::Duration,
+	borrow::Borrow, path::{Path, PathBuf}, time::Duration
 };
 use strres::{exec, StrRes};
 use term_painter::{
-	Color::{Green, Red, Yellow},
-	ToStyle,
+	Color::{Green, Red, Yellow}, ToStyle
 };
 use testing::{test_single, TestResult};
 use ui::timefmt;

@@ -41,7 +41,11 @@ fn parse_duration(s: &str) -> R<Duration> {
 }
 
 #[derive(StructOpt)]
-#[structopt(name = "ci", about = "CLI for building and testing programming contest tasks", raw(global_setting = "structopt::clap::AppSettings::VersionlessSubcommands"))]
+#[structopt(
+	name = "ci",
+	about = "CLI for building and testing programming contest tasks",
+	raw(global_setting = "structopt::clap::AppSettings::VersionlessSubcommands")
+)]
 pub enum Args {
 	#[structopt(name = "build", about = "Compile source with useful flags")]
 	Build {
@@ -61,7 +65,12 @@ pub enum Args {
 		executable: PathBuf,
 		#[structopt(name = "TESTDIR", parse(from_os_str), help = "Tests directory path")]
 		testdir: PathBuf,
-		#[structopt(long = "checker", parse(try_from_str = "parse_checker"), default_value = "\0CheckerDiffOut", help = "Checker path")]
+		#[structopt(
+			long = "checker",
+			parse(try_from_str = "parse_checker"),
+			default_value = "\0CheckerDiffOut",
+			help = "Checker path"
+		)]
 		checker: Box<checkers::Checker>,
 		#[structopt(long = "no-print-success", help = "Do not print successful tests")]
 		no_print_success: bool,
@@ -72,12 +81,22 @@ pub enum Args {
 		gen: PathBuf,
 		#[structopt(name = "EXECUTABLES", parse(from_os_str), help = "Solution executables' paths")]
 		executables: Vec<PathBuf>,
-		#[structopt(long = "checker", parse(try_from_str = "parse_checker"), default_value = "\0CheckerDiffOut", help = "Checker path")]
+		#[structopt(
+			long = "checker",
+			parse(try_from_str = "parse_checker"),
+			default_value = "\0CheckerDiffOut",
+			help = "Checker path"
+		)]
 		checker: Box<checkers::Checker>,
 		#[structopt(short = "n", long = "count", help = "Test case count")]
 		count: Option<i64>,
 		// TODO force structopt to require count
-		#[structopt(long = "fitness", parse(try_from_str = "fitness::parse_fitness"), default_value = "@bytelen", help = "Test fitness function")]
+		#[structopt(
+			long = "fitness",
+			parse(try_from_str = "fitness::parse_fitness"),
+			default_value = "@bytelen",
+			help = "Test fitness function"
+		)]
 		fitness: Box<fitness::Fitness>,
 		#[structopt(long = "time-limit", parse(try_from_str = "parse_duration"), help = "Program execution time limit")]
 		time_limit: Option<Duration>,
