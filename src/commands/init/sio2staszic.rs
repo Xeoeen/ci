@@ -1,13 +1,9 @@
 use super::{Site, Test};
-use keyring::{Keyring, KeyringError};
 use reqwest::Url;
-use rpassword;
 use sio2;
-use std::{
-	collections::HashMap, io::{stderr, stdin, Read, Write}
-};
+use std::{collections::HashMap, io::Read};
 use tar::Archive;
-use term_painter::{Color::Red, ToStyle};
+use ui::read_auth;
 
 pub struct Sio2Staszic;
 
@@ -51,36 +47,5 @@ impl Site for Sio2Staszic {
 				output: ss.1.unwrap(),
 			})
 			.collect()
-	}
-}
-
-fn read_auth(domain: &str) -> (String, String) {
-	let key = Keyring::new("ci", domain);
-	match key.get_password() {
-		Ok(entry) => {
-			let username = &entry[0..entry.find('#').unwrap()];
-			let password = &entry[entry.find('#').unwrap() + 1..];
-			(username.to_owned(), password.to_owned())
-		},
-		Err(e) => {
-			match e {
-				KeyringError::NoPasswordFound => (),
-				KeyringError::NoBackendFound => {
-					eprintln!("{}", Red.bold().paint("No keyring found, quit using Arch"));
-				},
-				_ => Err(e).unwrap(),
-			}
-			eprintln!("Login required to {}", domain);
-			eprint!("  Username: ");
-			stderr().flush().unwrap();
-			let mut username = String::new();
-			stdin().read_line(&mut username).unwrap();
-			username = username.trim().to_owned();
-			let password = rpassword::prompt_password_stderr("  Password: ").unwrap();
-			match key.set_password(&format!("{}#{}", username, password)) {
-				Ok(()) | Err(KeyringError::NoBackendFound) => (username, password),
-				Err(e) => Err(e).unwrap(),
-			}
-		},
 	}
 }

@@ -111,6 +111,13 @@ pub enum Args {
 		#[structopt(name = "URL", help = "Task description URL")]
 		url: Url,
 	},
+	#[structopt(name = "submit", about = "Submit solution to programming contest")]
+	Submit {
+		#[structopt(name = "SOURCE", parse(from_os_str), help = "Solution source path")]
+		source: PathBuf,
+		#[structopt(name = "URL", help = "Task description URL")]
+		url: Url,
+	},
 	#[structopt(name = "internal-autocomplete", about = "Generate autocompletion script for appropriate shell")]
 	InternalAutocomplete {
 		#[structopt(name = "SHELL", help = "Shell name")]

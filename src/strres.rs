@@ -113,7 +113,7 @@ pub fn exec(executable: &Path, input: StrRes, time_limit: Option<&Duration>) -> 
 	Ok(StrRes::InMemory(out_str))
 }
 
-fn endread<RE: Read>(mut re: RE) -> io::Result<Vec<u8>> {
+pub fn endread<RE: Read>(mut re: RE) -> io::Result<Vec<u8>> {
 	let mut buf = Vec::new();
 	re.read_to_end(&mut buf)?;
 	Ok(buf)

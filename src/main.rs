@@ -72,6 +72,7 @@ fn run() -> R<()> {
 		Args::Vendor { source } => commands::vendor::run(source.as_path()),
 		Args::InternalAutocomplete { shell } => commands::genautocomplete::run(shell),
 		Args::Init { url } => commands::init::run(&url),
+		Args::Submit { source, url } => commands::submit::run(&url, &source),
 	}
 }
 
