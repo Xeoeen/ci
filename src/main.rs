@@ -71,7 +71,7 @@ fn run() -> R<()> {
 			time_limit,
 		} => commands::multitest::run(gen.as_path(), &executables, checker.as_ref(), count, fitness.borrow(), time_limit),
 		Args::Vendor { source } => commands::vendor::run(source.as_path()),
-		Args::InternalAutocomplete { shell } => commands::genautocomplete::run(shell),
+		Args::GenerateAutocomplete { shell } => commands::genautocomplete::run(shell),
 		Args::Init { url } => commands::init::run(&url),
 		Args::Submit { source, url } => commands::submit::run(&url, &source),
 	}

@@ -10,7 +10,7 @@ If you do not have `cargo` installed, run `curl https://sh.rustup.rs | sh`.
 
 ### Bash autocomplete
 ```bash
-ci internal-autocomplete bash | sudo tee /usr/share/bash-completion/completions/ci
+ci generate-autocomplete bash | sudo tee /usr/share/bash-completion/completions/ci
 ```
 
 ## Usage

@@ -118,8 +118,8 @@ pub enum Args {
 		#[structopt(name = "URL", help = "Task description URL")]
 		url: Url,
 	},
-	#[structopt(name = "internal-autocomplete", about = "Generate autocompletion script for appropriate shell")]
-	InternalAutocomplete {
+	#[structopt(name = "generate-autocomplete", about = "Generate autocompletion script for appropriate shell")]
+	GenerateAutocomplete {
 		#[structopt(name = "SHELL", help = "Shell name")]
 		shell: structopt::clap::Shell,
 	},
