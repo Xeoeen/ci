@@ -4,6 +4,7 @@ extern crate structopt;
 extern crate failure;
 #[macro_use]
 extern crate failure_derive;
+extern crate codeforces;
 extern crate itertools;
 extern crate keyring;
 extern crate pbr;

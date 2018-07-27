@@ -1,3 +1,4 @@
+mod codeforces;
 mod sio2;
 
 use error::{E, R};
@@ -15,6 +16,7 @@ const MATCHERS: &[(&'static str, Submitter)] = &[
 	("sio2.mimuw.edu.pl", sio2::Sio2::submit_solution),
 	("kiwi.ii.uni.wroc.pl", sio2::Sio2::submit_solution),
 	("szkopul.edu.pl", sio2::Sio2::submit_solution),
+	("codeforces.com", codeforces::Codeforces::submit_solution),
 ];
 
 pub fn run(url: &Url, code: &Path) -> R<()> {
