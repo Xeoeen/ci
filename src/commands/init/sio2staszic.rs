@@ -19,7 +19,7 @@ impl Site for Sio2Staszic {
 		let problem = ps[3];
 
 		let (user, pass) = read_auth("sio2.staszic.waw.pl");
-		let mut sess = sio2::Session::new_login("https://sio2.staszic.waw.pl".parse().unwrap(), &user, &pass);
+		let mut sess = sio2::Session::new("https://sio2.staszic.waw.pl".parse().unwrap()).login(user, pass).spawn();
 		let tarfile = sess.get_url(&format!("https://sio2.staszic.waw.pl/c/{}/staszic/example-tests/{}/", contest, problem).parse().unwrap());
 		let mut ar = Archive::new(tarfile.as_slice());
 
