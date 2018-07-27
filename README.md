@@ -88,3 +88,10 @@ To use the command, a directory `/usr/share/ci/dummy-includes` must be created, 
 ci init https://codeforces.com/contest/960/problem/D
 ```
 To save time on entering example tests, this command will download and save them to `./tests/example` directory for you. Few task formats are supported.
+
+### `ci submit`
+
+```bash
+ci submit code.cpp https://codeforces.com/contest/960/problem/D
+```
+To save time on submitting your code, this command will submit them for you! Few sites are suppported. The URL should be the URL to problem description(same as in `ci init`).
