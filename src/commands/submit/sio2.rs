@@ -11,17 +11,14 @@ impl Site for Sio2 {
 		let ps = url.path_segments().unwrap().collect::<Vec<_>>();
 		let contest_name = ps[1];
 		let problem = ps[3];
-		eprintln!("{} {}", contest_name, problem);
 		let (user, pass) = read_auth(url.domain().unwrap());
 		let site = {
 			let mut site = url.to_owned();
 			site.path_segments_mut().unwrap().pop().pop().pop().pop().pop().pop();
-			eprintln!("{:?}", site);
 			site
 		};
 		let mut sess = sio2::Session::new(site).login(user, pass).spawn();
 		let mut contest = sess.contest(contest_name);
-		eprintln!("{:?}", contest.submittable_problems());
 		let problem_id = contest
 			.submittable_problems()
 			.into_iter()
