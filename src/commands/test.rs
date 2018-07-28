@@ -58,6 +58,7 @@ pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_succes
 	diagnose_app(&executable)?;
 	diagnose_checker(checker)?;
 	let test_count = recursive_find_tests(&testdir).count();
+	let mut good = true;
 	let mut pb = pbr::ProgressBar::new(test_count as u64);
 	for in_path in recursive_find_tests(&testdir) {
 		let out_path = in_path.with_extension("out");
@@ -72,7 +73,13 @@ pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_succes
 			let timestr = Blue.bold().paint(timing.map(|timing| Cow::Owned(timefmt(timing))).unwrap_or(Cow::Borrowed("-.--s")));
 			pb_interwrite!(pb, "{} {} {}", rstr, timestr, in_path.display());
 		}
+		if outcome != TestResult::Accept {
+			good = false;
+		}
 		pb.inc();
+	}
+	if !good {
+		std::process::exit(1);
 	}
 	Ok(())
 }
