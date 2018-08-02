@@ -82,7 +82,7 @@ fn main() {
 		let error_prefix = Red.bold().paint("error");
 		let cause_prefix = Yellow.bold().paint("caused by");
 		println!("{}: {}", error_prefix, e);
-		for cause in e.causes().skip(1) {
+		for cause in e.iter_causes().skip(1) {
 			println!("{}: {}", cause_prefix, cause);
 		}
 		::std::process::exit(1);
