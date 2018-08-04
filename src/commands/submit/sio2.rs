@@ -3,15 +3,15 @@ use reqwest::Url;
 use sio2;
 use std::{fs::File, path::Path, str::from_utf8};
 use strres::endread;
-use ui::read_auth;
+use ui::Ui;
 
 pub struct Sio2;
 impl Site for Sio2 {
-	fn submit_solution(url: &Url, code: &Path) {
+	fn submit_solution(url: &Url, code: &Path, ui: &Ui) {
 		let ps = url.path_segments().unwrap().collect::<Vec<_>>();
 		let contest_name = ps[1];
 		let problem = ps[3];
-		let (user, pass) = read_auth(url.domain().unwrap());
+		let (user, pass) = ui.read_auth(url.domain().unwrap());
 		let site = {
 			let mut site = url.to_owned();
 			site.path_segments_mut().unwrap().pop().pop().pop().pop().pop().pop();

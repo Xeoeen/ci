@@ -4,6 +4,8 @@ extern crate structopt;
 extern crate failure;
 #[macro_use]
 extern crate failure_derive;
+#[macro_use]
+extern crate serde_derive;
 extern crate codeforces;
 extern crate itertools;
 extern crate keyring;
@@ -11,6 +13,8 @@ extern crate pbr;
 extern crate reqwest;
 extern crate rpassword;
 extern crate select;
+extern crate serde;
+extern crate serde_json;
 extern crate sio2;
 extern crate tar;
 extern crate tempfile;
@@ -30,7 +34,7 @@ mod commands;
 mod fitness;
 mod util;
 
-use cli::Args;
+use cli::{Args, Command};
 use commands::build::Codegen;
 use error::*;
 use std::borrow::Borrow;
@@ -41,8 +45,9 @@ use term_painter::{
 
 fn run() -> R<()> {
 	let args = Args::from_args();
-	match args {
-		Args::Build {
+	let Args { ui, command } = args;
+	match command {
+		Command::Build {
 			source,
 			release,
 			profile,
@@ -56,24 +61,24 @@ fn run() -> R<()> {
 			};
 			commands::build::run(source.as_path(), &codegen, &standard)
 		},
-		Args::Test {
+		Command::Test {
 			executable,
 			testdir,
 			checker,
 			no_print_success,
-		} => commands::test::run(executable.as_path(), testdir.as_path(), checker.borrow(), no_print_success),
-		Args::Multitest {
+		} => commands::test::run(executable.as_path(), testdir.as_path(), checker.borrow(), no_print_success, ui.borrow()),
+		Command::Multitest {
 			gen,
 			executables,
 			checker,
 			count,
 			fitness,
 			time_limit,
-		} => commands::multitest::run(gen.as_path(), &executables, checker.as_ref(), count, fitness.borrow(), time_limit),
-		Args::Vendor { source } => commands::vendor::run(source.as_path()),
-		Args::GenerateAutocomplete { shell } => commands::genautocomplete::run(shell),
-		Args::Init { url } => commands::init::run(&url),
-		Args::Submit { source, url } => commands::submit::run(&url, &source),
+		} => commands::multitest::run(gen.as_path(), &executables, checker.as_ref(), count, fitness.borrow(), time_limit, ui.borrow()),
+		Command::Vendor { source } => commands::vendor::run(source.as_path()),
+		Command::GenerateAutocomplete { shell } => commands::genautocomplete::run(shell),
+		Command::Init { url } => commands::init::run(&url, ui.borrow()),
+		Command::Submit { source, url } => commands::submit::run(&url, &source, ui.borrow()),
 	}
 }
 
@@ -81,9 +86,9 @@ fn main() {
 	if let Err(e) = run() {
 		let error_prefix = Red.bold().paint("error");
 		let cause_prefix = Yellow.bold().paint("caused by");
-		println!("{}: {}", error_prefix, e);
+		eprintln!("{}: {}", error_prefix, e);
 		for cause in e.iter_causes().skip(1) {
-			println!("{}: {}", cause_prefix, cause);
+			eprintln!("{}: {}", cause_prefix, cause);
 		}
 		::std::process::exit(1);
 	}

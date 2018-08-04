@@ -5,6 +5,7 @@ use fitness;
 use reqwest::Url;
 use std::{path::PathBuf, time::Duration};
 use structopt;
+use ui;
 
 fn parse_checker(s: &str) -> R<Box<checkers::Checker>> {
 	if s == "\0CheckerDiffOut" {
@@ -40,13 +41,29 @@ fn parse_duration(s: &str) -> R<Duration> {
 	})
 }
 
+fn parse_ui(s: &str) -> R<Box<ui::Ui>> {
+	Ok(match s {
+		"human" => Box::new(ui::Human::new()),
+		"json" => Box::new(ui::Json::new()),
+		_ => return Err(format_err!("unknown format {} (known: human, json)", s)),
+	})
+}
+
 #[derive(StructOpt)]
 #[structopt(
 	name = "ci",
 	about = "CLI for building and testing programming contest tasks",
 	raw(global_setting = "structopt::clap::AppSettings::VersionlessSubcommands")
 )]
-pub enum Args {
+pub struct Args {
+	#[structopt(long = "format", parse(try_from_str = "parse_ui"), default_value = "human", help = "User interface format")]
+	pub ui: Box<ui::Ui>,
+	#[structopt(subcommand)]
+	pub command: Command,
+}
+
+#[derive(StructOpt)]
+pub enum Command {
 	#[structopt(name = "build", about = "Compile source with useful flags")]
 	Build {
 		#[structopt(name = "SOURCE", parse(from_os_str), help = "Source file path")]

@@ -2,12 +2,12 @@ use super::Site;
 use codeforces as cf;
 use reqwest::Url;
 use std::{fs::File, io::Read, path::Path};
-use ui::read_auth;
+use ui::Ui;
 
 pub struct Codeforces;
 impl Site for Codeforces {
-	fn submit_solution(url: &Url, path: &Path) {
-		let (user, pass) = read_auth("codeforces.com");
+	fn submit_solution(url: &Url, path: &Path, ui: &Ui) {
+		let (user, pass) = ui.read_auth("codeforces.com");
 		let code = {
 			let mut code = String::new();
 			let mut f = File::open(path).unwrap();
