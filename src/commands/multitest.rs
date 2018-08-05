@@ -13,7 +13,7 @@ use testing::{test_single, TestResult};
 use ui::{timefmt, Ui};
 use util::timefn;
 
-pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option<i64>, fitness: &Fitness, time_limit: Option<Duration>, ui: &Ui) -> R<()> {
+pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option<i64>, fitness: &Fitness, time_limit: Option<Duration>, _ui: &Ui) -> R<()> {
 	for executable in executables.iter() {
 		diagnose_app(executable)?;
 	}

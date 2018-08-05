@@ -22,6 +22,7 @@ extern crate term_painter;
 extern crate wait_timeout;
 extern crate walkdir;
 
+mod auth;
 mod checkers;
 mod diagnose;
 mod error;

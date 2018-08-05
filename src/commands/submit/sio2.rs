@@ -1,4 +1,5 @@
 use super::Site;
+use auth;
 use reqwest::Url;
 use sio2;
 use std::{fs::File, path::Path, str::from_utf8};
@@ -11,7 +12,7 @@ impl Site for Sio2 {
 		let ps = url.path_segments().unwrap().collect::<Vec<_>>();
 		let contest_name = ps[1];
 		let problem = ps[3];
-		let (user, pass) = ui.read_auth(url.domain().unwrap());
+		let (user, pass) = auth::get(url.domain().unwrap(), ui);
 		let site = {
 			let mut site = url.to_owned();
 			site.path_segments_mut().unwrap().pop().pop().pop().pop().pop().pop();

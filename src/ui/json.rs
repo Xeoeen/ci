@@ -1,6 +1,6 @@
 use super::Ui;
 use serde_json;
-use std::io::stdin;
+use std::io::{stdin, stdout, Write};
 
 pub struct Json;
 impl Json {
@@ -11,6 +11,7 @@ impl Json {
 impl Ui for Json {
 	fn read_auth(&self, domain: &str) -> (String, String) {
 		println!("{}", serde_json::to_string(&AuthRequest { domain: domain.to_owned() }).unwrap());
+		stdout().flush().unwrap();
 		let mut line = String::new();
 		stdin().read_line(&mut line).unwrap();
 		let resp: AuthResponse = serde_json::from_str(&line).unwrap();

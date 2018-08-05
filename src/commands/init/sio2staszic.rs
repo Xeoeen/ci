@@ -1,4 +1,5 @@
 use super::{Site, Test};
+use auth;
 use reqwest::Url;
 use sio2;
 use std::{collections::HashMap, io::Read};
@@ -13,7 +14,7 @@ impl Site for Sio2Staszic {
 		let contest = ps[1];
 		let problem = ps[3];
 
-		let (user, pass) = ui.read_auth("sio2.staszic.waw.pl");
+		let (user, pass) = auth::get("sio2.staszic.waw.pl", ui);
 		let mut sess = sio2::Session::new("https://sio2.staszic.waw.pl".parse().unwrap()).login(user, pass).spawn();
 		let tarfile = sess.get_url(&format!("https://sio2.staszic.waw.pl/c/{}/staszic/example-tests/{}/", contest, problem).parse().unwrap());
 		let mut ar = Archive::new(tarfile.as_slice());

@@ -6,7 +6,7 @@ use ui::Ui;
 pub struct Codeforces;
 
 impl Site for Codeforces {
-	fn download_tests(url: &Url, ui: &Ui) -> Vec<Test> {
+	fn download_tests(url: &Url, _ui: &Ui) -> Vec<Test> {
 		let mut sess = cf::Session::new().unwrap();
 		let mut prob = sess.problem_from_url(url).unwrap();
 		prob.example_tests()
