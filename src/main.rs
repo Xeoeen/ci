@@ -67,7 +67,8 @@ fn run() -> R<()> {
 			testdir,
 			checker,
 			no_print_success,
-		} => commands::test::run(executable.as_path(), testdir.as_path(), checker.borrow(), no_print_success, ui.borrow()),
+			print_output,
+		} => commands::test::run(executable.as_path(), testdir.as_path(), checker.borrow(), no_print_success, print_output, ui.borrow()),
 		Command::Multitest {
 			gen,
 			executables,

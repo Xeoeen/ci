@@ -2,14 +2,10 @@ use checkers::Checker;
 use diagnose::*;
 use error::*;
 use itertools::{self, Itertools};
-use pbr;
-use std::{
-	self, borrow::{Borrow, Cow}, cmp::Ordering, io::stderr, path::Path
-};
+use std::{self, borrow::Borrow, cmp::Ordering, path::Path};
 use strres::StrRes;
-use term_painter::{Color::Blue, ToStyle};
 use testing::{test_single, TestResult};
-use ui::{timefmt, Ui};
+use ui::Ui;
 use walkdir;
 
 fn ord_by_test_number(lhs: &std::path::PathBuf, rhs: &std::path::PathBuf) -> Ordering {
@@ -53,30 +49,28 @@ fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>
 	Box::new(tests.into_iter())
 }
 
-pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_success: bool, _ui: &Ui) -> R<()> {
+pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_success: bool, print_output: bool, ui: &Ui) -> R<()> {
 	ensure!(testdir.exists(), err_msg("test directory does not exist"));
 	diagnose_app(&executable)?;
 	diagnose_checker(checker)?;
 	let test_count = recursive_find_tests(&testdir).count();
 	let mut good = true;
-	let mut pb = pbr::ProgressBar::on(stderr(), test_count as u64);
+	let mut pb = ui.create_progress_bar(test_count);
 	for in_path in recursive_find_tests(&testdir) {
 		let out_path = in_path.with_extension("out");
-		let (outcome, timing) = if out_path.exists() {
-			let (outcome, timing) = test_single(&executable, StrRes::from_path(&in_path), StrRes::from_path(&out_path), checker.borrow(), None)?;
-			(outcome, Some(timing))
+		let (output, outcome, timing) = if out_path.exists() {
+			let (out, outcome, timing) = test_single(&executable, StrRes::from_path(&in_path), StrRes::from_path(&out_path), checker.borrow(), None)?;
+			(out, outcome, Some(timing))
 		} else {
-			(TestResult::IgnoredNoOut, None)
+			(StrRes::Empty, TestResult::IgnoredNoOut, None)
 		};
 		if outcome != TestResult::Accept || !no_print_success {
-			let rstr = outcome.format_long();
-			let timestr = Blue.bold().paint(timing.map(|timing| Cow::Owned(timefmt(timing))).unwrap_or(Cow::Borrowed("-.--s")));
-			pb_interwrite!(pb, "{} {} {}", rstr, timestr, in_path.display());
+			pb.print_test(&outcome, timing, &in_path, if print_output { Some(output) } else { None });
 		}
 		if outcome != TestResult::Accept {
 			good = false;
 		}
-		pb.inc();
+		pb.increment();
 	}
 	if !good {
 		std::process::exit(1);

@@ -91,6 +91,8 @@ pub enum Command {
 		checker: Box<checkers::Checker>,
 		#[structopt(long = "no-print-success", help = "Do not print successful tests")]
 		no_print_success: bool,
+		#[structopt(long = "print-output", help = "Print output")]
+		print_output: bool,
 	},
 	#[structopt(name = "multitest", about = "Run solutions on random tests until they fail")]
 	Multitest {

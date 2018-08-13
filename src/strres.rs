@@ -1,13 +1,12 @@
 use error::*;
 use std::{
-	fs::File, io::{self, Read, Write}, path::{Path, PathBuf}, process::{self, Command, Stdio}, time::Duration
+	fs::{self, File}, io::{self, Read, Write}, path::{Path, PathBuf}, process::{self, Command, Stdio}, str::from_utf8, time::Duration
 };
 use tempfile::NamedTempFile;
 use wait_timeout::ChildExt;
 
 pub enum StrRes {
 	InMemory(String),
-	FileHandle(File),
 	FilePath(PathBuf),
 	Empty,
 }
@@ -20,16 +19,7 @@ impl StrRes {
 	pub fn get_string(&self) -> R<String> {
 		match *self {
 			StrRes::InMemory(ref s) => Ok(s.clone()),
-			StrRes::FileHandle(ref file) => {
-				let mut f2 = file.clone();
-				let mut s = String::new();
-				f2.read_to_string(&mut s)?;
-				Ok(s)
-			},
-			StrRes::FilePath(ref path) => {
-				let file = File::open(path)?;
-				StrRes::FileHandle(file).get_string()
-			},
+			StrRes::FilePath(ref path) => Ok(from_utf8(&fs::read(path)?)?.to_owned()),
 			StrRes::Empty => Ok("".to_owned()),
 		}
 	}
@@ -43,7 +33,6 @@ impl StrRes {
 				f(tmp.path())
 			},
 			StrRes::Empty => f(Path::new("/dev/null")),
-			_ => unimplemented!("StrRes::with_filename"),
 		}
 	}
 
@@ -52,7 +41,6 @@ impl StrRes {
 			StrRes::InMemory(ref s) => StrRes::InMemory(s.clone()),
 			StrRes::FilePath(ref path) => StrRes::FilePath(path.clone()),
 			StrRes::Empty => StrRes::Empty,
-			_ => unimplemented!("StrRes::clone"),
 		}
 	}
 
@@ -65,27 +53,9 @@ impl StrRes {
 	}
 }
 
-#[test]
-fn double_strres_getstring_file() {
-	const TEST_STR: &str = "Hello, world!\n";
-	let f = NamedTempFile::new().unwrap();
-	{
-		let mut f1 = f.reopen().unwrap();
-		f1.write_all(TEST_STR.as_bytes()).unwrap();
-		f1.flush().unwrap();
-	}
-	let s = StrRes::FileHandle(f.reopen().unwrap());
-	let r1 = s.get_string().unwrap();
-	let r2 = s.get_string().unwrap();
-	eprintln!("{:?} -> {:?} {:?}", TEST_STR, r1, r2);
-	assert_eq!(r1, TEST_STR);
-	assert_eq!(r2, TEST_STR);
-}
-
 pub fn exec(executable: &Path, input: StrRes, time_limit: Option<&Duration>) -> R<StrRes> {
 	let (stdin_settings, to_write) = match input {
 		StrRes::InMemory(s) => (Stdio::piped(), Some(s)),
-		StrRes::FileHandle(file) => (Stdio::from(file), None),
 		StrRes::FilePath(path) => (Stdio::from(File::open(path).unwrap()), None),
 		StrRes::Empty => (Stdio::null(), None),
 	};

@@ -37,7 +37,7 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option
 		let mut all_succeded = out1.is_some();
 		for execi in executables[1..].iter() {
 			if let Some(perfout) = out1.as_ref() {
-				let (outi, ti) = test_single(execi, test_str.clone(), perfout.clone(), checker.borrow(), time_limit.as_ref())?;
+				let (_out, outi, ti) = test_single(execi, test_str.clone(), perfout.clone(), checker.borrow(), time_limit.as_ref())?;
 				let rawmsg = timefmt(ti);
 				let msg = outi.apply_color(&rawmsg);
 				eprint_flush!(" {}", msg);
