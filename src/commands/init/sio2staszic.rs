@@ -16,7 +16,7 @@ impl Site for Sio2Staszic {
 
 		let (user, pass) = auth::get("sio2.staszic.waw.pl", ui);
 		let mut sess = sio2::Session::new("https://sio2.staszic.waw.pl".parse().unwrap()).login(user, pass).spawn();
-		let tarfile = sess.get_url(&format!("https://sio2.staszic.waw.pl/c/{}/staszic/example-tests/{}/", contest, problem).parse().unwrap());
+		let tarfile = sess.get_url(&format!("https://sio2.staszic.waw.pl/c/{}/example-tests/{}/", contest, problem).parse().unwrap());
 		let mut ar = Archive::new(tarfile.as_slice());
 
 		let mut tests: HashMap<String, (Option<String>, Option<String>)> = HashMap::new();
