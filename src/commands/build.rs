@@ -24,9 +24,9 @@ pub enum Codegen {
 fn compile_cpp(source: &Path, output: &Path, codegen: &Codegen, cppver: &CppVer) -> R<()> {
 	let mut args = vec![];
 	args.push(cppver.flag());
-	args.extend_from_slice(&["-Wall", "-Wextra", "-Wconversion", "-Wno-sign-conversion"]);
+	args.extend_from_slice(&["-Wall", "-Wextra", "-Wconversion", "-Wshadow", "-Wno-sign-conversion"]);
 	args.extend_from_slice(match *codegen {
-		Codegen::Debug => &["-g", "-D_GLIBCXX_DEBUG", "-fno-sanitize-recover=undefined"],
+		Codegen::Debug => &["-g", "-D_GLIBCXX_DEBUG", "-fno-sanitize-recover=undefined", "-fsanitize=undefined"],
 		Codegen::Release => &["-Ofast"],
 		Codegen::Profile => &["-g", "-O2", "-fno-inline-functions"],
 	});
