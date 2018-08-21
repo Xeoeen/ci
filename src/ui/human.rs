@@ -1,11 +1,11 @@
 use super::Ui;
+use colored::Colorize;
 use pbr;
 use rpassword;
 use std::{
-	borrow::Cow, io::{stderr, stdin, Stderr, Write}, path::Path, time::Duration
+	io::{stderr, stdin, Stderr, Write}, path::Path, time::Duration
 };
 use strres::StrRes;
-use term_painter::{Color::Blue, ToStyle};
 use testing::TestResult;
 use ui::{timefmt, ProgressBar};
 
@@ -35,7 +35,7 @@ impl Ui for Human {
 impl ProgressBar for pbr::ProgressBar<Stderr> {
 	fn print_test(&mut self, outcome: &TestResult, timing: Option<Duration>, in_path: &Path, output: Option<StrRes>) {
 		let rstr = outcome.format_long();
-		let timestr = Blue.bold().paint(timing.map(|timing| Cow::Owned(timefmt(timing))).unwrap_or(Cow::Borrowed("-.--s")));
+		let timestr = timing.map(|timing| timefmt(timing)).unwrap_or("-.--s".to_owned()).blue().bold();
 		pb_interwrite!(self, "{} {} {}", rstr, timestr, in_path.display());
 		if let Some(output) = output {
 			pb_interwrite!(self, "{}", output.get_string().unwrap());

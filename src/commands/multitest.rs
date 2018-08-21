@@ -1,4 +1,5 @@
 use checkers::Checker;
+use colored::Colorize;
 use diagnose::*;
 use error::*;
 use fitness::Fitness;
@@ -6,9 +7,6 @@ use std::{
 	borrow::Borrow, path::{Path, PathBuf}, time::Duration
 };
 use strres::{exec, StrRes};
-use term_painter::{
-	Color::{Green, Red, Yellow}, ToStyle
-};
 use testing::{test_single, TestResult};
 use ui::{timefmt, Ui};
 use util::timefn;
@@ -27,10 +25,10 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option
 		let (out1, t1) = timefn(|| exec(Path::new(&executables[0]), test_str.clone(), time_limit.as_ref()));
 
 		let out1 = if let Ok(out1) = out1 {
-			eprint_flush!(" {}", Green.bold().paint(timefmt(t1)));
+			eprint_flush!(" {}", timefmt(t1).green().bold());
 			Some(out1)
 		} else {
-			eprint_flush!(" {}", Red.bold().paint(timefmt(t1)));
+			eprint_flush!(" {}", timefmt(t1).red().bold());
 			None
 		};
 
@@ -46,7 +44,7 @@ pub fn run(gen: &Path, executables: &[PathBuf], checker: &Checker, count: Option
 					all_succeded = false;
 				}
 			} else {
-				eprint_flush!(" {}", Yellow.bold().paint("-.--s"));
+				eprint_flush!(" {}", "-.--s".yellow().bold());
 			}
 		}
 		eprintln!();
