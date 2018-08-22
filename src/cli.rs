@@ -137,6 +137,15 @@ pub enum Command {
 		#[structopt(name = "URL", help = "Task description URL")]
 		url: Url,
 	},
+	#[structopt(name = "track-submit", about = "Check submission status automatically")]
+	TrackSubmit {
+		#[structopt(name = "URL", help = "Task description URL")]
+		url: Url,
+		#[structopt(name = "SUBMID", help = "Submission ID")]
+		id: String,
+		#[structopt(name = "SLEEPTIME", parse(try_from_str = "parse_duration"), help = "Time to sleep for between checks")]
+		sleep_duration: Duration,
+	},
 	#[structopt(name = "generate-autocomplete", about = "Generate autocompletion script for appropriate shell")]
 	GenerateAutocomplete {
 		#[structopt(name = "SHELL", help = "Shell name")]

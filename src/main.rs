@@ -6,6 +6,7 @@ extern crate failure;
 extern crate failure_derive;
 #[macro_use]
 extern crate serde_derive;
+extern crate chrono;
 extern crate codeforces;
 extern crate colored;
 extern crate itertools;
@@ -79,6 +80,7 @@ fn run() -> R<()> {
 		Command::GenerateAutocomplete { shell } => commands::genautocomplete::run(shell),
 		Command::Init { url } => commands::init::run(&url, ui.borrow()),
 		Command::Submit { source, url } => commands::submit::run(&url, &source, ui.borrow()),
+		Command::TrackSubmit { url, id, sleep_duration } => commands::tracksubmit::run(&url, id, sleep_duration, ui.borrow()),
 	}
 }
 

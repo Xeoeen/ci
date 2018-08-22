@@ -10,13 +10,14 @@ pub struct Sio2Staszic;
 
 impl Site for Sio2Staszic {
 	fn download_tests(url: &Url, ui: &Ui) -> Vec<Test> {
-		let ps = url.path_segments().unwrap().collect::<Vec<_>>();
-		let contest = ps[1];
-		let problem = ps[3];
+		let sio2::task_url::Deconstructed { contest, symbol, .. } = sio2::task_url::deconstruct(&url);
+		// 		let ps = url.path_segments().unwrap().collect::<Vec<_>>();
+		// 		let contest = ps[1];
+		// 		let problem = ps[3];
 
 		let (user, pass) = auth::get("sio2.staszic.waw.pl", ui);
 		let mut sess = sio2::Session::new("https://sio2.staszic.waw.pl".parse().unwrap()).login(user, pass).spawn();
-		let tarfile = sess.get_url(&format!("https://sio2.staszic.waw.pl/c/{}/example-tests/{}/", contest, problem).parse().unwrap());
+		let tarfile = sess.get_url(&format!("https://sio2.staszic.waw.pl/c/{}/example-tests/{}/", contest, symbol).parse().unwrap());
 		let mut ar = Archive::new(tarfile.as_slice());
 
 		let mut tests: HashMap<String, (Option<String>, Option<String>)> = HashMap::new();

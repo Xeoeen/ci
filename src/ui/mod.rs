@@ -32,6 +32,7 @@ pub fn timefmt(t: std::time::Duration) -> String {
 pub trait Ui {
 	fn read_auth(&self, domain: &str) -> (String, String);
 	fn create_progress_bar(&self, n: usize) -> Box<ProgressBar>;
+	fn track_progress(&self, status: &commands::tracksubmit::Status);
 }
 
 // TODO separate print_test and change this system into four traits: ProgressBar, BareUi, Ui: BareUi
@@ -41,6 +42,7 @@ pub trait ProgressBar {
 }
 
 pub use self::{human::Human, json::Json};
+use commands;
 use std::{path::Path, time::Duration};
 use strres::StrRes;
 use testing::TestResult;

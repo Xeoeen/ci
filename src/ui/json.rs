@@ -1,4 +1,5 @@
 use super::Ui;
+use commands;
 use serde_json;
 use std::{
 	io::{stdin, stdout, Write}, path::Path, time::Duration
@@ -25,6 +26,10 @@ impl Ui for Json {
 
 	fn create_progress_bar(&self, _: usize) -> Box<ProgressBar> {
 		Box::new(NoProgressBar)
+	}
+
+	fn track_progress(&self, _status: &commands::tracksubmit::Status) {
+		unimplemented!()
 	}
 }
 
