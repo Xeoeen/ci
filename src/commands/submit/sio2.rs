@@ -38,5 +38,7 @@ impl Site for Sio2 {
 			}
 		};
 		contest.submit(problem_id, lang, from_utf8(&endread(File::open(code).unwrap()).unwrap()).unwrap());
+		let id = contest.recent_submissions()[0].id;
+		ui.submit_success(id.to_string());
 	}
 }

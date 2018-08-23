@@ -1,6 +1,4 @@
 use auth;
-use chrono::Local;
-use colored::Colorize;
 use commands::{
 	self, tracksubmit::{Examples, Site}
 };

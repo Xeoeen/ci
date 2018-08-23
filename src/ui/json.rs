@@ -1,5 +1,5 @@
 use super::Ui;
-use commands;
+use commands::{self, tracksubmit::Examples};
 use serde_json;
 use std::{
 	io::{stdin, stdout, Write}, path::Path, time::Duration
@@ -28,8 +28,35 @@ impl Ui for Json {
 		Box::new(NoProgressBar)
 	}
 
-	fn track_progress(&self, _status: &commands::tracksubmit::Status) {
-		unimplemented!()
+	fn track_progress(&self, status: &commands::tracksubmit::Status) {
+		fn convert_examples(examples: &Examples) -> bool {
+			match examples {
+				Examples::OK => true,
+				Examples::Wrong => false,
+			}
+		}
+		let obj = match status {
+			commands::tracksubmit::Status::InitialPending => TrackProgress {
+				status: TrackStatus::InitialPending,
+				examples_succeded: None,
+				score: None,
+			},
+			commands::tracksubmit::Status::ScorePending { examples } => TrackProgress {
+				status: TrackStatus::ScorePending,
+				examples_succeded: Some(convert_examples(examples)),
+				score: None,
+			},
+			commands::tracksubmit::Status::ScoreReady { examples, score } => TrackProgress {
+				status: TrackStatus::ScoreReady,
+				examples_succeded: Some(convert_examples(examples)),
+				score: Some(*score),
+			},
+		};
+		println!("{}", serde_json::to_string(&obj).unwrap());
+	}
+
+	fn submit_success(&self, id: String) {
+		println!("{}", serde_json::to_string(&SubmitResult { id }).unwrap());
 	}
 }
 
@@ -65,4 +92,22 @@ struct SingleTest<'a> {
 	timing: Option<Duration>,
 	in_path: &'a Path,
 	output: Option<String>,
+}
+
+#[derive(Serialize)]
+struct SubmitResult {
+	id: String,
+}
+
+#[derive(Serialize)]
+enum TrackStatus {
+	InitialPending,
+	ScorePending,
+	ScoreReady,
+}
+#[derive(Serialize)]
+struct TrackProgress {
+	status: TrackStatus,
+	examples_succeded: Option<bool>,
+	score: Option<i64>,
 }

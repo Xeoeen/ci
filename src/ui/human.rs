@@ -42,6 +42,10 @@ impl Ui for Human {
 			Status::ScoreReady { examples, score } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), self.format_score(*score)),
 		}
 	}
+
+	fn submit_success(&self, id: String) {
+		eprintln!("Solution submitted, submission id: {}", id);
+	}
 }
 
 impl Human {

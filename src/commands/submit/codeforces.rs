@@ -33,5 +33,6 @@ impl Site for Codeforces {
 			.expect("language identifiers became outdated - program update required")
 			.id;
 		prob.submit(&code, language_id).unwrap();
+		// TODO getting submission id
 	}
 }
