@@ -21,7 +21,7 @@ pub enum Codegen {
 	Profile,
 }
 
-fn compile_cpp(source: &Path, output: &Path, codegen: &Codegen, cppver: &CppVer) -> R<()> {
+fn compile_cpp(source: &Path, output: &Path, codegen: &Codegen, cppver: &CppVer, library: Option<&Path>) -> R<()> {
 	let mut args = vec![];
 	args.push(cppver.flag());
 	args.extend_from_slice(&["-Wall", "-Wextra", "-Wconversion", "-Wshadow", "-Wno-sign-conversion"]);
@@ -31,6 +31,9 @@ fn compile_cpp(source: &Path, output: &Path, codegen: &Codegen, cppver: &CppVer)
 		Codegen::Profile => &["-g", "-O2", "-fno-inline-functions"],
 	});
 	args.push(source.to_str().unwrap());
+	if let Some(library) = library {
+		args.push(library.to_str().unwrap());
+	}
 	args.push("-o");
 	args.push(output.to_str().unwrap());
 	let mut kid = std::process::Command::new("clang++").args(&args).stderr(std::process::Stdio::inherit()).spawn()?;
@@ -46,11 +49,11 @@ fn compile_cpp(source: &Path, output: &Path, codegen: &Codegen, cppver: &CppVer)
 	Ok(())
 }
 
-pub fn run(source: &Path, codegen: &Codegen, standard: &CppVer) -> R<()> {
+pub fn run(source: &Path, codegen: &Codegen, standard: &CppVer, library: Option<&Path>) -> R<()> {
 	ensure!(
 		source.extension().unwrap_or_else(|| OsStr::new("")) == "cpp",
 		E::InvalidFileExtension("cpp".to_string(), source.to_str().unwrap().to_string())
 	);
 	let executable = source.with_extension("e");
-	compile_cpp(&source, &executable, codegen, &standard)
+	compile_cpp(&source, &executable, codegen, &standard, library)
 }

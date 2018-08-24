@@ -52,6 +52,7 @@ fn run() -> R<()> {
 			release,
 			profile,
 			standard,
+			library,
 		} => {
 			let codegen = match (release, profile) {
 				(false, false) => Codegen::Debug,
@@ -59,7 +60,7 @@ fn run() -> R<()> {
 				(false, true) => Codegen::Profile,
 				(true, true) => return Err(format_err!("both --release and --profile specified")),
 			};
-			commands::build::run(source.as_path(), &codegen, &standard)
+			commands::build::run(source.as_path(), &codegen, &standard, library.as_ref().map(|p| p.as_path()))
 		},
 		Command::Test {
 			executable,

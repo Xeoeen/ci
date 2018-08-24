@@ -75,6 +75,8 @@ pub enum Command {
 		profile: bool,
 		#[structopt(long = "standard", parse(try_from_str = "parse_standard"), default_value = "17", help = "C++ standard")]
 		standard: commands::build::CppVer,
+		#[structopt(long = "lib", parse(from_os_str), help = "Additional library code")]
+		library: Option<PathBuf>,
 	},
 	#[structopt(name = "test", about = "Run solution on tests from directory")]
 	Test {
