@@ -121,6 +121,8 @@ pub enum Command {
 		fitness: Box<fitness::Fitness>,
 		#[structopt(long = "time-limit", parse(try_from_str = "parse_duration"), help = "Program execution time limit")]
 		time_limit: Option<Duration>,
+		#[structopt(long = "ignore-gen-fail", help = "Ignore non-zero test generator exit code")]
+		ignore_generator_fail: bool,
 	},
 	#[structopt(name = "vendor", about = "Merge solution and its dependencies into single source file")]
 	Vendor {
