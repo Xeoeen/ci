@@ -1,5 +1,6 @@
 use super::{Site, Test};
 use codeforces as cf;
+use commands::init::Description;
 use reqwest::Url;
 use ui::Ui;
 
@@ -24,5 +25,10 @@ impl Site for Codeforces {
 				output: test.output,
 			})
 			.collect()
+	}
+
+	fn download_description(&mut self, _: &Url, _: &Ui) -> Option<Description> {
+		eprintln!("Codeforces init does not support description download yet");
+		None
 	}
 }

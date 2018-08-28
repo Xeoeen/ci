@@ -1,5 +1,6 @@
 use super::{Site, Test};
 use auth;
+use commands::init::Description;
 use reqwest::Url;
 use sio2;
 use std::{collections::HashMap, io::Read};
@@ -53,5 +54,13 @@ impl Site for Sio2Staszic {
 				output: ss.1.unwrap(),
 			})
 			.collect()
+	}
+
+	fn download_description(&mut self, url: &Url, _: &Ui) -> Option<Description> {
+		let data = self.session.get_url(url);
+		Some(Description {
+			data,
+			extension: "pdf".to_string(),
+		})
 	}
 }

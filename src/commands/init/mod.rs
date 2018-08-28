@@ -3,6 +3,7 @@ mod sio2staszic;
 
 use error::*;
 use reqwest::Url;
+use std;
 use ui::Ui;
 use util::{demand_dir, writefile};
 
@@ -10,9 +11,14 @@ pub struct Test {
 	input: String,
 	output: String,
 }
+pub struct Description {
+	data: Vec<u8>,
+	extension: String,
+}
 
 pub trait Site {
 	fn download_tests(&mut self, url: &Url, ui: &Ui) -> Vec<Test>;
+	fn download_description(&mut self, url: &Url, ui: &Ui) -> Option<Description>;
 }
 
 pub fn run(url: &Url, ui: &Ui) -> R<()> {
@@ -28,6 +34,9 @@ pub fn run(url: &Url, ui: &Ui) -> R<()> {
 	for (i, test) in tests.into_iter().enumerate() {
 		writefile(&format!("./tests/example/{}.in", i + 1), &test.input);
 		writefile(&format!("./tests/example/{}.out", i + 1), &test.output);
+	}
+	if let Some(Description { data, extension }) = site.download_description(url, ui) {
+		std::fs::write(&format!("./desc.{}", extension), &data)?;
 	}
 	Ok(())
 }
