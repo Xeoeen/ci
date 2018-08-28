@@ -12,13 +12,19 @@ pub struct Test {
 }
 
 pub trait Site {
-	fn download_tests(url: &Url, ui: &Ui) -> Vec<Test>;
+	fn download_tests(&mut self, url: &Url, ui: &Ui) -> Vec<Test>;
 }
 
 pub fn run(url: &Url, ui: &Ui) -> R<()> {
+	let domain = url.domain().unwrap();
+	let mut site: Box<Site> = MATCHERS
+		.iter()
+		.find(|&&(dom, _)| dom == domain)
+		.ok_or_else(|| Error::from(E::UnsupportedProblemSite(domain.to_owned())))
+		.map(move |(_, f)| f(url, ui))?;
 	demand_dir("./tests/").context("failed to create tests directory")?;
 	demand_dir("./tests/example/").context("failed to create tests directory")?;
-	let tests = acquire_tests(&url, ui).context("failed to downloade tests")?;
+	let tests = site.download_tests(url, ui);
 	for (i, test) in tests.into_iter().enumerate() {
 		writefile(&format!("./tests/example/{}.in", i + 1), &test.input);
 		writefile(&format!("./tests/example/{}.out", i + 1), &test.output);
@@ -26,17 +32,5 @@ pub fn run(url: &Url, ui: &Ui) -> R<()> {
 	Ok(())
 }
 
-type Downloader = fn(&Url, &Ui) -> Vec<Test>;
-const MATCHERS: &[(&str, Downloader)] = &[
-	("codeforces.com", codeforces::Codeforces::download_tests),
-	("sio2.staszic.waw.pl", sio2staszic::Sio2Staszic::download_tests),
-];
-
-fn acquire_tests(url: &Url, ui: &Ui) -> R<Vec<Test>> {
-	let domain = url.domain().unwrap();
-	MATCHERS
-		.iter()
-		.find(|&&(dom, _)| dom == domain)
-		.ok_or_else(|| Error::from(E::UnsupportedProblemSite(domain.to_owned())))
-		.map(move |(_, f)| f(url, ui))
-}
+type Connector = fn(&Url, &Ui) -> Box<Site>;
+const MATCHERS: &[(&str, Connector)] = &[("codeforces.com", codeforces::connect), ("sio2.staszic.waw.pl", sio2staszic::connect)];

@@ -3,12 +3,19 @@ use codeforces as cf;
 use reqwest::Url;
 use ui::Ui;
 
-pub struct Codeforces;
+pub struct Codeforces {
+	session: cf::Session,
+}
+
+pub fn connect(_: &Url, _: &Ui) -> Box<Site> {
+	Box::new(Codeforces {
+		session: cf::Session::new().unwrap(),
+	})
+}
 
 impl Site for Codeforces {
-	fn download_tests(url: &Url, _ui: &Ui) -> Vec<Test> {
-		let mut sess = cf::Session::new().unwrap();
-		let mut prob = sess.problem_from_url(url).unwrap();
+	fn download_tests(&mut self, url: &Url, _ui: &Ui) -> Vec<Test> {
+		let mut prob = self.session.problem_from_url(url).unwrap();
 		prob.example_tests()
 			.unwrap()
 			.into_iter()

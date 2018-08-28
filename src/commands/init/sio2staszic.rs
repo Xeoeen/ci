@@ -6,18 +6,22 @@ use std::{collections::HashMap, io::Read};
 use tar::Archive;
 use ui::Ui;
 
-pub struct Sio2Staszic;
+pub struct Sio2Staszic {
+	session: sio2::Session,
+}
+
+pub fn connect(_: &Url, ui: &Ui) -> Box<Site> {
+	let (user, pass) = auth::get("sio2.staszic.waw.pl", ui);
+	let session = sio2::Session::new("https://sio2.staszic.waw.pl".parse().unwrap()).login(user, pass).spawn();
+	Box::new(Sio2Staszic { session })
+}
 
 impl Site for Sio2Staszic {
-	fn download_tests(url: &Url, ui: &Ui) -> Vec<Test> {
+	fn download_tests(&mut self, url: &Url, _: &Ui) -> Vec<Test> {
 		let sio2::task_url::Deconstructed { contest, symbol, .. } = sio2::task_url::deconstruct(&url);
-		// 		let ps = url.path_segments().unwrap().collect::<Vec<_>>();
-		// 		let contest = ps[1];
-		// 		let problem = ps[3];
-
-		let (user, pass) = auth::get("sio2.staszic.waw.pl", ui);
-		let mut sess = sio2::Session::new("https://sio2.staszic.waw.pl".parse().unwrap()).login(user, pass).spawn();
-		let tarfile = sess.get_url(&format!("https://sio2.staszic.waw.pl/c/{}/example-tests/{}/", contest, symbol).parse().unwrap());
+		let tarfile = self
+			.session
+			.get_url(&format!("https://sio2.staszic.waw.pl/c/{}/example-tests/{}/", contest, symbol).parse().unwrap());
 		let mut ar = Archive::new(tarfile.as_slice());
 
 		let mut tests: HashMap<String, (Option<String>, Option<String>)> = HashMap::new();
