@@ -1,10 +1,9 @@
 use super::Site;
-use auth;
 use reqwest::Url;
-use sio2;
 use std::{fs::File, path::Path, str::from_utf8};
 use strres::endread;
 use ui::Ui;
+use util::sio2_get_session;
 
 pub struct Sio2;
 impl Site for Sio2 {
@@ -12,13 +11,7 @@ impl Site for Sio2 {
 		let ps = url.path_segments().unwrap().collect::<Vec<_>>();
 		let contest_name = ps[1];
 		let problem = ps[3];
-		let (user, pass) = auth::get(url.domain().unwrap(), ui);
-		let site = {
-			let mut site = url.to_owned();
-			site.path_segments_mut().unwrap().pop().pop().pop().pop().pop().pop();
-			site
-		};
-		let mut sess = sio2::Session::new(site).login(user, pass).spawn();
+		let mut sess = sio2_get_session(url, ui);
 		let mut contest = sess.contest(contest_name);
 		let problem_id = contest
 			.submittable_problems()

@@ -1,19 +1,18 @@
 use super::{Site, Test};
-use auth;
 use commands::init::Description;
 use reqwest::Url;
 use sio2;
 use std::{collections::HashMap, io::Read};
 use tar::Archive;
 use ui::Ui;
+use util::sio2_get_session;
 
 pub struct Sio2Staszic {
 	session: sio2::Session,
 }
 
-pub fn connect(_: &Url, ui: &Ui) -> Box<Site> {
-	let (user, pass) = auth::get("sio2.staszic.waw.pl", ui);
-	let session = sio2::Session::new("https://sio2.staszic.waw.pl".parse().unwrap()).login(user, pass).spawn();
+pub fn connect(url: &Url, ui: &Ui) -> Box<Site> {
+	let session = sio2_get_session(url, ui);
 	Box::new(Sio2Staszic { session })
 }
 

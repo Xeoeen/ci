@@ -1,15 +1,14 @@
-use auth;
 use commands::{
 	self, tracksubmit::{Examples, Site}
 };
 use reqwest::Url;
 use sio2::{self, submission::Status, Session};
 use ui::Ui;
+use util::sio2_get_session;
 
 pub fn connect(url: &Url, id: &str, ui: &Ui) -> Box<Site> {
-	let sio2::task_url::Deconstructed { site, contest, .. } = sio2::task_url::deconstruct(&url);
-	let (user, pass) = auth::get(url.domain().unwrap(), ui);
-	let sess = sio2::Session::new(site).login(user, pass).spawn();
+	let sio2::task_url::Deconstructed { contest, .. } = sio2::task_url::deconstruct(&url);
+	let sess = sio2_get_session(url, ui);
 	Box::new(Oioioi {
 		sess,
 		contest_name: contest.to_owned(),
