@@ -25,9 +25,9 @@ pub enum Outcome {
 }
 #[derive(Serialize)]
 pub struct Status {
-	compilation: Compilation,
-	initial: Outcome,
-	full: Outcome,
+	pub compilation: Compilation,
+	pub initial: Outcome,
+	pub full: Outcome,
 }
 
 pub trait Site {

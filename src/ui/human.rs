@@ -1,7 +1,7 @@
 use super::Ui;
 use chrono::Local;
-use colored::{ColoredString, Colorize};
-use commands::{self, tracksubmit::Status};
+use colored::Colorize;
+use commands::tracksubmit::{Compilation, Outcome, Status};
 use pbr;
 use rpassword;
 use std::{
@@ -34,14 +34,22 @@ impl Ui for Human {
 	}
 
 	fn track_progress(&self, status: &Status) {
-		// 		match status {
-		// 			Status::InitialPending => eprintln!("{} {}", Local::now(), "Initial tests pending...".white().bold()),
-		// 			Status::RevealPending { examples } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), "Reveal pending...".white().bold()),
-		// 			Status::RevealReady { examples } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), "Reveal ready.".white().bold()),
-		// 			Status::ScorePending { examples } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), "Score pending...".white().bold()),
-		// 			Status::ScoreReady { examples, score } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), self.format_score(*score)),
-		// 		}
-		unimplemented!()
+		let message = match status {
+			Status {
+				compilation: Compilation::Pending,
+				..
+			} => "Compilation pending...".to_string(),
+			Status {
+				compilation: Compilation::Failure,
+				..
+			} => "Compilation error".to_string(),
+			Status { initial: Outcome::Pending, .. } => "Initial tests pending...".to_string(),
+			Status {
+				full: Outcome::Pending, initial, ..
+			} => format!("{}Score pending...", self.fmt_initial(initial)),
+			Status { full, .. } => self.fmt_full(full),
+		};
+		eprintln!("{} {}", Local::now(), message);
 	}
 
 	fn submit_success(&self, id: String) {
@@ -50,13 +58,27 @@ impl Ui for Human {
 }
 
 impl Human {
-	fn format_score(&self, score: i64) -> ColoredString {
-		if score == 0 {
-			score.to_string().red().bold()
-		} else if score == 100 {
-			score.to_string().green().bold()
-		} else {
-			score.to_string().blue().bold()
+	fn fmt_initial(&self, outcome: &Outcome) -> String {
+		match outcome {
+			Outcome::Score(score) => format!("Initial tests scored {}. ", score),
+			Outcome::Failure => "Initial tests failed. ".to_string(),
+			Outcome::Success => "Initial tests passed. ".to_string(),
+			Outcome::Pending => panic!("formatting pending initiial tests"),
+			Outcome::Unsupported => "".to_string(),
+			Outcome::Skipped => "".to_string(),
+			Outcome::Waiting => panic!("formatting waiting initial tests"),
+		}
+	}
+
+	fn fmt_full(&self, outcome: &Outcome) -> String {
+		match outcome {
+			Outcome::Score(score) => format!("Scored {}!", score),
+			Outcome::Failure => "Rejected".to_string(),
+			Outcome::Success => "Accepted".to_string(),
+			Outcome::Pending => panic!("formatting pending tests"),
+			Outcome::Unsupported => panic!("formatting unsupported tests"),
+			Outcome::Skipped => panic!("formatting skipped tests"),
+			Outcome::Waiting => panic!("formatting waiting tests"),
 		}
 	}
 }

@@ -1,8 +1,6 @@
 use auth;
 use codeforces::{self, Verdict};
-use commands::{
-	self, tracksubmit::{Compilation, Outcome, Site, Status}
-};
+use commands::tracksubmit::{Compilation, Outcome, Site, Status};
 use reqwest::Url;
 use ui::Ui;
 
