@@ -34,13 +34,14 @@ impl Ui for Human {
 	}
 
 	fn track_progress(&self, status: &Status) {
-		match status {
-			Status::InitialPending => eprintln!("{} {}", Local::now(), "Initial tests pending...".white().bold()),
-			// 			Status::RevealPending { examples } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), "Reveal pending...".white().bold()),
-			// 			Status::RevealReady { examples } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), "Reveal ready.".white().bold()),
-			Status::ScorePending { examples } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), "Score pending...".white().bold()),
-			Status::ScoreReady { examples, score } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), self.format_score(*score)),
-		}
+		// 		match status {
+		// 			Status::InitialPending => eprintln!("{} {}", Local::now(), "Initial tests pending...".white().bold()),
+		// 			Status::RevealPending { examples } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), "Reveal pending...".white().bold()),
+		// 			Status::RevealReady { examples } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), "Reveal ready.".white().bold()),
+		// 			Status::ScorePending { examples } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), "Score pending...".white().bold()),
+		// 			Status::ScoreReady { examples, score } => eprintln!("{} {} {}", Local::now(), self.format_track_examples(examples), self.format_score(*score)),
+		// 		}
+		unimplemented!()
 	}
 
 	fn submit_success(&self, id: String) {
@@ -49,16 +50,6 @@ impl Ui for Human {
 }
 
 impl Human {
-	fn format_track_examples(&self, examples: &commands::tracksubmit::Examples) -> String {
-		format!(
-			"Initial tests {}.",
-			match examples {
-				commands::tracksubmit::Examples::OK => "passed".green().bold(),
-				commands::tracksubmit::Examples::Wrong => "failed".red().bold(),
-			}
-		)
-	}
-
 	fn format_score(&self, score: i64) -> ColoredString {
 		if score == 0 {
 			score.to_string().red().bold()

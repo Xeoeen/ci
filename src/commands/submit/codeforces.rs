@@ -34,5 +34,9 @@ impl Site for Codeforces {
 			.id;
 		prob.submit(&code, language_id).unwrap();
 		// TODO getting submission id
+		let mut submissions = prob.contest_submissions().expect("failed to get submissions");
+		submissions.sort_by_key(|submission| submission.when);
+		let id = submissions.last().expect("no submission even though just submitted").id;
+		ui.submit_success(id.to_string());
 	}
 }

@@ -1,3 +1,4 @@
+mod codeforces;
 mod oioioi;
 
 use error::{E, R};
@@ -6,17 +7,27 @@ use reqwest::Url;
 use std::{thread, time::Duration};
 use ui::Ui;
 
-pub enum Examples {
-	OK,
-	Wrong,
+#[derive(Serialize, PartialEq, Eq)]
+pub enum Compilation {
+	Pending,
+	Success,
+	Failure,
 }
-pub enum Status {
-	InitialPending,
-	// 	RevealPending { examples: Examples },
-	// 	RevealReady { examples: Examples },
-	// TODO reveals
-	ScorePending { examples: Examples },
-	ScoreReady { examples: Examples, score: i64 },
+#[derive(Serialize, PartialEq, Eq)]
+pub enum Outcome {
+	Unsupported,
+	Skipped,
+	Waiting, // waiting for other things to finish first
+	Pending, // this will finish first
+	Success,
+	Failure,
+	Score(i64),
+}
+#[derive(Serialize)]
+pub struct Status {
+	compilation: Compilation,
+	initial: Outcome,
+	full: Outcome,
 }
 
 pub trait Site {
@@ -24,7 +35,7 @@ pub trait Site {
 }
 
 type Connector = fn(&Url, &str, &Ui) -> Box<Site>;
-const MATCHERS: &[(&str, Connector)] = &[("sio2.staszic.waw.pl", oioioi::connect)];
+const MATCHERS: &[(&str, Connector)] = &[("sio2.staszic.waw.pl", oioioi::connect), ("codeforces.com", codeforces::connect)];
 
 pub fn run(url: &Url, id: String, sleep_duration: Duration, ui: &Ui) -> R<()> {
 	let domain = url.domain().unwrap();
@@ -36,10 +47,7 @@ pub fn run(url: &Url, id: String, sleep_duration: Duration, ui: &Ui) -> R<()> {
 	loop {
 		let status = site.fetch_status();
 		ui.track_progress(&status);
-		let should_end = match status {
-			Status::InitialPending{..} | Status::ScorePending{..} /*| Status::RevealPending{..}*/ => false,
-			/*Status::RevealReady{..} |*/ Status::ScoreReady{..} => true,
-		};
+		let should_end = status.compilation != Compilation::Pending && status.initial != Outcome::Pending && status.full != Outcome::Pending;
 		if should_end {
 			break;
 		}

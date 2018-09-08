@@ -1,8 +1,8 @@
 use commands::{
-	self, tracksubmit::{Examples, Site}
+	self, tracksubmit::{Compilation, Outcome, Site, Status}
 };
 use reqwest::Url;
-use sio2::{self, submission::Status, Session};
+use sio2::{self, Session};
 use ui::Ui;
 use util::sio2_get_session;
 
@@ -26,22 +26,47 @@ impl Site for Oioioi {
 	fn fetch_status(&mut self) -> commands::tracksubmit::Status {
 		let mut contest = self.sess.contest(&self.contest_name);
 		let details = contest.submission_details(self.subm_id);
-		let examples = match &details.status {
-			Status::OK | Status::InitialOK => Some(Examples::OK),
-			Status::Pending => None,
-			Status::WrongAnswer | Status::TimeLimitExceeded | Status::MemoryLimitExceeded | Status::RuntimeError | Status::CompilationFailed | Status::InitialFailed => {
-				Some(Examples::Wrong)
-			},
-		};
-		let score = details.score.clone();
-		if let Some(examples) = examples {
-			if let Some(score) = score {
-				commands::tracksubmit::Status::ScoreReady { examples, score }
-			} else {
-				commands::tracksubmit::Status::ScorePending { examples }
-			}
+		let full = if let Some(score) = details.score {
+			Outcome::Score(score)
 		} else {
-			commands::tracksubmit::Status::InitialPending
+			match &details.status {
+				sio2::Status::CompilationFailed => Outcome::Skipped,
+				sio2::Status::OK
+				| sio2::Status::WrongAnswer
+				| sio2::Status::TimeLimitExceeded
+				| sio2::Status::MemoryLimitExceeded
+				| sio2::Status::RuntimeError
+				| sio2::Status::InitialOK
+				| sio2::Status::InitialFailed => Outcome::Pending,
+				sio2::Status::Pending => Outcome::Waiting,
+			}
+		};
+		match &details.status {
+			sio2::Status::CompilationFailed => Status {
+				compilation: Compilation::Failure,
+				initial: Outcome::Skipped,
+				full,
+			},
+			sio2::Status::Pending => Status {
+				compilation: Compilation::Pending,
+				initial: Outcome::Waiting,
+				full,
+			},
+			sio2::Status::InitialOK => Status {
+				compilation: Compilation::Success,
+				initial: Outcome::Success,
+				full,
+			},
+			sio2::Status::InitialFailed => Status {
+				compilation: Compilation::Success,
+				initial: Outcome::Failure,
+				full,
+			},
+			sio2::Status::OK | sio2::Status::WrongAnswer | sio2::Status::TimeLimitExceeded | sio2::Status::MemoryLimitExceeded | sio2::Status::RuntimeError => Status {
+				compilation: Compilation::Success,
+				initial: Outcome::Skipped,
+				full,
+			},
 		}
 	}
 }
