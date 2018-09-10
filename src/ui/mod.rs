@@ -34,6 +34,8 @@ pub trait Ui {
 	fn create_progress_bar(&self, n: usize) -> Box<ProgressBar>;
 	fn track_progress(&self, status: &commands::tracksubmit::Status);
 	fn submit_success(&self, id: String);
+	fn print_resource_list(&self, resources: &[commands::list_resources::Resource]);
+	fn print_resource(&self, data: &[u8]);
 }
 
 // TODO separate print_test and change this system into four traits: ProgressBar, BareUi, Ui: BareUi

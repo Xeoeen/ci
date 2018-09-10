@@ -1,11 +1,13 @@
 use super::Ui;
 use chrono::Local;
 use colored::Colorize;
-use commands::tracksubmit::{Compilation, Outcome, Status};
+use commands::{
+	list_resources::Resource, tracksubmit::{Compilation, Outcome, Status}
+};
 use pbr;
 use rpassword;
 use std::{
-	io::{stderr, stdin, Stderr, Write}, path::Path, time::Duration
+	io::{stderr, stdin, stdout, Stderr, Write}, path::Path, time::Duration
 };
 use strres::StrRes;
 use testing::TestResult;
@@ -54,6 +56,21 @@ impl Ui for Human {
 
 	fn submit_success(&self, id: String) {
 		eprintln!("Solution submitted, submission id: {}", id);
+	}
+
+	fn print_resource_list(&self, resources: &[Resource]) {
+		for resource in resources {
+			println!("{}", resource.name.white().bold());
+			println!("{}", resource.description);
+			println!("{}", resource.filename);
+			println!("{}", resource.id);
+			println!("");
+		}
+	}
+
+	fn print_resource(&self, data: &'_ [u8]) {
+		stdout().write_all(&data).unwrap();
+		stdout().flush().unwrap();
 	}
 }
 

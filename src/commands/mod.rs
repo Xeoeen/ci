@@ -1,6 +1,8 @@
 pub mod build;
+pub mod download;
 pub mod genautocomplete;
 pub mod init;
+pub mod list_resources;
 pub mod multitest;
 pub mod submit;
 pub mod test;

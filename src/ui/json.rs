@@ -1,5 +1,5 @@
 use super::Ui;
-use commands;
+use commands::{self, list_resources::Resource};
 use serde_json;
 use std::{
 	io::{stdin, stdout, Write}, path::Path, time::Duration
@@ -34,6 +34,14 @@ impl Ui for Json {
 
 	fn submit_success(&self, id: String) {
 		println!("{}", serde_json::to_string(&SubmitResult { id }).unwrap());
+	}
+
+	fn print_resource_list(&self, resources: &[Resource]) {
+		println!("{}", serde_json::to_string(&resources).unwrap());
+	}
+
+	fn print_resource(&self, data: &'_ [u8]) {
+		println!("{}", serde_json::to_string(&data).unwrap()); // TODO base64 encode
 	}
 }
 

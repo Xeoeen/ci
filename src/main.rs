@@ -91,6 +91,8 @@ fn run() -> R<()> {
 		Command::GenerateAutocomplete { shell } => commands::genautocomplete::run(shell),
 		Command::Init { url } => commands::init::run(&url, ui.borrow()),
 		Command::Submit { source, url } => commands::submit::run(&url, &source, ui.borrow()),
+		Command::ListResources { url } => commands::list_resources::run(&url, ui.borrow()),
+		Command::Download { url, id, file } => commands::download::run(&url, &id, &file, ui.borrow()),
 		Command::TrackSubmit { url, id, sleep_duration } => commands::tracksubmit::run(&url, id, sleep_duration, ui.borrow()),
 	}
 }

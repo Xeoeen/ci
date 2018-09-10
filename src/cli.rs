@@ -150,6 +150,20 @@ pub enum Command {
 		#[structopt(name = "SLEEPTIME", parse(try_from_str = "parse_duration"), help = "Time to sleep for between checks")]
 		sleep_duration: Duration,
 	},
+	#[structopt(name = "list-resources", about = "List provided resources")]
+	ListResources {
+		#[structopt(name = "URL", help = "Task description URL")]
+		url: Url,
+	},
+	#[structopt(name = "download", about = "Download a resource")]
+	Download {
+		#[structopt(name = "URL", help = "Task description URL")]
+		url: Url,
+		#[structopt(name = "ID", help = "Resource id")]
+		id: String,
+		#[structopt(name = "FILE", parse(from_os_str), help = "Target filename")]
+		file: PathBuf,
+	},
 	#[structopt(name = "generate-autocomplete", about = "Generate autocompletion script for appropriate shell")]
 	GenerateAutocomplete {
 		#[structopt(name = "SHELL", help = "Shell name")]
