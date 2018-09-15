@@ -3,23 +3,17 @@ extern crate structopt;
 #[macro_use]
 extern crate failure;
 #[macro_use]
-extern crate failure_derive;
-#[macro_use]
 extern crate serde_derive;
 extern crate chrono;
-extern crate codeforces;
 extern crate colored;
 extern crate itertools;
 extern crate keyring;
 extern crate pbr;
-extern crate reqwest;
 extern crate rpassword;
-extern crate select;
 extern crate serde;
 extern crate serde_json;
-extern crate sio2;
-extern crate tar;
 extern crate tempfile;
+extern crate unijudge;
 extern crate wait_timeout;
 extern crate walkdir;
 

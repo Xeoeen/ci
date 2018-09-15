@@ -10,8 +10,6 @@ pub enum E {
 	StdioFail,
 	#[fail(display = "expected file {} to have .{} extension", _1, _0)]
 	InvalidFileExtension(String, String),
-	#[fail(display = "unsupported problem site {}", _0)]
-	UnsupportedProblemSite(String),
 	#[fail(display = "time limit exceeded")]
 	TimeLimitExceeded,
 }

@@ -2,7 +2,6 @@ use checkers;
 use commands;
 use error::*;
 use fitness;
-use reqwest::Url;
 use std::{path::PathBuf, time::Duration};
 use structopt;
 use ui;
@@ -132,19 +131,19 @@ pub enum Command {
 	#[structopt(name = "init", about = "Set up working environment and download tests")]
 	Init {
 		#[structopt(name = "URL", help = "Task description URL")]
-		url: Url,
+		url: String,
 	},
 	#[structopt(name = "submit", about = "Submit solution to programming contest")]
 	Submit {
 		#[structopt(name = "SOURCE", parse(from_os_str), help = "Solution source path")]
 		source: PathBuf,
 		#[structopt(name = "URL", help = "Task description URL")]
-		url: Url,
+		url: String,
 	},
 	#[structopt(name = "track-submit", about = "Check submission status automatically")]
 	TrackSubmit {
 		#[structopt(name = "URL", help = "Task description URL")]
-		url: Url,
+		url: String,
 		#[structopt(name = "SUBMID", help = "Submission ID")]
 		id: String,
 		#[structopt(name = "SLEEPTIME", parse(try_from_str = "parse_duration"), help = "Time to sleep for between checks")]
@@ -153,12 +152,12 @@ pub enum Command {
 	#[structopt(name = "list-resources", about = "List provided resources")]
 	ListResources {
 		#[structopt(name = "URL", help = "Task description URL")]
-		url: Url,
+		url: String,
 	},
 	#[structopt(name = "download", about = "Download a resource")]
 	Download {
 		#[structopt(name = "URL", help = "Task description URL")]
-		url: Url,
+		url: String,
 		#[structopt(name = "ID", help = "Resource id")]
 		id: String,
 		#[structopt(name = "FILE", parse(from_os_str), help = "Target filename")]

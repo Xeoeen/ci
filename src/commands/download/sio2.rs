@@ -1,6 +1,4 @@
 use commands::download::Site;
-use reqwest::Url;
-use sio2;
 use ui::Ui;
 use util::sio2_get_session;
 

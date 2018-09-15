@@ -1,11 +1,8 @@
-mod codeforces;
-mod oioioi;
-
-use error::{E, R};
-use failure::Error;
-use reqwest::Url;
+use error::R;
 use std::{thread, time::Duration};
 use ui::Ui;
+use unijudge;
+use util::connect;
 
 #[derive(Serialize, PartialEq, Eq)]
 pub enum Compilation {
@@ -30,24 +27,27 @@ pub struct Status {
 	pub full: Outcome,
 }
 
-pub trait Site {
-	fn fetch_status(&mut self) -> Status;
-}
-
-type Connector = fn(&Url, &str, &Ui) -> Box<Site>;
-const MATCHERS: &[(&str, Connector)] = &[("sio2.staszic.waw.pl", oioioi::connect), ("codeforces.com", codeforces::connect)];
-
-pub fn run(url: &Url, id: String, sleep_duration: Duration, ui: &Ui) -> R<()> {
-	let domain = url.domain().unwrap();
-	let connector = MATCHERS
-		.iter()
-		.find(|&&(dom, _)| dom == domain)
-		.ok_or_else(|| Error::from(E::UnsupportedProblemSite(domain.to_owned())))?;
-	let mut site = (connector.1)(url, &id, ui);
+pub fn run(url: &str, id: String, sleep_duration: Duration, ui: &Ui) -> R<()> {
+	let tu = unijudge::TaskUrl::deconstruct(url);
+	let sess = connect(url, ui);
+	let cont = sess.contest(&tu.contest);
 	loop {
-		let status = site.fetch_status();
+		let submissions = cont.submissions_recent();
+		let submission = submissions.iter().find(|subm| subm.id == id).unwrap();
+		let (compilation, full) = match submission.verdict {
+			unijudge::Verdict::Accepted => (Compilation::Success, Outcome::Success),
+			unijudge::Verdict::Rejected => (Compilation::Success, Outcome::Failure),
+			unijudge::Verdict::CompilationError => (Compilation::Failure, Outcome::Skipped),
+			unijudge::Verdict::Score(score) => (Compilation::Success, Outcome::Score(score)),
+			unijudge::Verdict::Pending => (Compilation::Pending, Outcome::Waiting),
+		};
+		let status = Status {
+			compilation,
+			initial: Outcome::Unsupported,
+			full,
+		};
 		ui.track_progress(&status);
-		let should_end = status.compilation != Compilation::Pending && status.initial != Outcome::Pending && status.full != Outcome::Pending;
+		let should_end = status.compilation != Compilation::Pending && status.full != Outcome::Pending;
 		if should_end {
 			break;
 		}

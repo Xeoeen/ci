@@ -1,12 +1,10 @@
 use auth;
-use colored::Colorize;
 use keyring::{Keyring, KeyringError};
-use reqwest::Url;
-use sio2;
 use std::{
 	self, fs::{create_dir, File}, io::{self, Write}
 };
 use ui::Ui;
+use unijudge;
 
 pub fn timefn<T, F: FnOnce() -> T>(f: F) -> (T, std::time::Duration) {
 	let inst = std::time::Instant::now();
@@ -25,21 +23,22 @@ pub fn demand_dir(path: &str) -> Result<(), io::Error> {
 	}
 }
 
-pub fn sio2_get_session(url: &Url, ui: &Ui) -> sio2::Session {
-	let sio2::task_url::Deconstructed { site, .. } = sio2::task_url::deconstruct(&url);
-	let keyring_name = format!("{} @sessionid", site.domain().unwrap());
+pub fn connect(url: &str, ui: &Ui) -> Box<unijudge::Session> {
+	let tu = unijudge::TaskUrl::deconstruct(url);
+	let keyring_name = format!("{} @sessionid", tu.site);
 	let keyring = Keyring::new("ci", &keyring_name);
 	match keyring.get_password() {
-		Ok(sessionid) => sio2::Session::new(site.clone()).cached_session(sessionid).spawn(),
-		Err(e) => {
-			if let KeyringError::NoPasswordFound = e {
+		Ok(session_id) => unijudge::connect_cached(&tu.site, &session_id),
+		Err(KeyringError::NoPasswordFound) => {
+			let (user, pass) = auth::get(&tu.site, ui);
+			let sess = unijudge::connect_login(&tu.site, &user, &pass);
+			if let Some(session_id) = sess.cache_sessionid() {
+				keyring.set_password(&session_id).unwrap();
 			} else {
-				eprintln!("{} {}", "keyring error:".red().bold(), e);
+				eprintln!("{}", "could not cache session, expect slow connecting");
 			}
-			let (user, pass) = auth::get(url.domain().unwrap(), ui);
-			let sess = sio2::Session::new(site.clone()).login(user, pass).spawn();
-			keyring.set_password(&sess.session_id()).unwrap();
 			sess
 		},
+		Err(e) => Err(e).unwrap(),
 	}
 }
