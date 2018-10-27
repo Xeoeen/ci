@@ -27,7 +27,7 @@ pub struct Status {
 	pub full: Outcome,
 }
 
-pub fn run(url: &str, id: String, sleep_duration: Duration, ui: &Ui) -> R<()> {
+pub fn run(url: &str, id: String, sleep_duration: Duration, ui: &mut Ui) -> R<()> {
 	let tu = unijudge::TaskUrl::deconstruct(url);
 	let sess = connect(url, ui);
 	let cont = sess.contest(&tu.contest);

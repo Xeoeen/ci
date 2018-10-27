@@ -23,7 +23,7 @@ pub fn demand_dir(path: &str) -> Result<(), io::Error> {
 	}
 }
 
-pub fn connect(url: &str, ui: &Ui) -> Box<unijudge::Session> {
+pub fn connect(url: &str, ui: &mut Ui) -> Box<unijudge::Session> {
 	let tu = unijudge::TaskUrl::deconstruct(url);
 	let keyring_name = format!("{} @sessionid", tu.site);
 	let keyring = Keyring::new("ci", &keyring_name);
@@ -35,7 +35,7 @@ pub fn connect(url: &str, ui: &Ui) -> Box<unijudge::Session> {
 			if let Some(session_id) = sess.cache_sessionid() {
 				keyring.set_password(&session_id).unwrap();
 			} else {
-				eprintln!("{}", "could not cache session, expect slow connecting");
+				ui.notice("could not cache session, expect slow connecting");
 			}
 			sess
 		},

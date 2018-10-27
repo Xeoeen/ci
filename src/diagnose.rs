@@ -1,15 +1,15 @@
 use checkers::Checker;
-use colored::Colorize;
 use error::*;
-use std::{self, io::Write, path::Path, process::Command};
+use std::{self, path::Path, process::Command};
+use ui::Ui;
 
-pub fn diagnose_app(app: &Path) -> R<()> {
+pub fn diagnose_app(app: &Path, ui: &mut Ui) -> R<()> {
 	std::fs::metadata(app).context(format_err!("Failed to execute {:?}", app))?;
 
 	if has_extension(app, "e") {
 		let srcfile = app.with_extension("cpp");
 		if srcfile.exists() && older_than(app, &srcfile)? {
-			warn(&format!(".e is older than corresponding .cpp file ({})", app.display()));
+			ui.warn(&format!(".e is older than corresponding .cpp file ({})", app.display()));
 		}
 	}
 
@@ -17,12 +17,12 @@ pub fn diagnose_app(app: &Path) -> R<()> {
 	Ok(())
 }
 
-pub fn diagnose_checker(checker: &Checker) -> R<()> {
+pub fn diagnose_checker(checker: &Checker, ui: &mut Ui) -> R<()> {
 	static TYPICAL_CHECKER_FILES: [&str; 3] = ["checker.cpp", "checker.e", "checker.py"];
 	if checker.is_default() {
 		for tcf in &TYPICAL_CHECKER_FILES {
 			if Path::new(tcf).exists() {
-				warn(&format!("No checker specified, but file {} present", tcf));
+				ui.warn(&format!("No checker specified, but file {} present", tcf));
 				break;
 			}
 		}
@@ -32,12 +32,6 @@ pub fn diagnose_checker(checker: &Checker) -> R<()> {
 
 fn has_extension(path: &Path, ext: &str) -> bool {
 	path.extension().map(|e| e == ext).unwrap_or(false)
-}
-
-fn warn(s: &str) {
-	eprint!("{} {}. Continue? ", "WARNING".red().bold(), s);
-	std::io::stderr().flush().unwrap();
-	std::io::stdin().read_line(&mut String::new()).unwrap();
 }
 
 fn older_than(a: &Path, b: &Path) -> R<bool> {

@@ -1,6 +1,5 @@
-use diagnose::diagnose_app;
 use error::R;
-use std::{self, io::Write, path::Path, str::from_utf8};
+use std::{self, io::Write, str::from_utf8};
 use strres::StrRes;
 
 pub trait Fitness {
@@ -19,7 +18,7 @@ struct App {
 }
 impl App {
 	fn new(app: String) -> R<App> {
-		diagnose_app(Path::new(&app))?;
+		// TODO: diagnose fitness
 		Ok(App { app })
 	}
 }

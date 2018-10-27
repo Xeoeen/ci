@@ -5,14 +5,13 @@ extern crate failure;
 #[macro_use]
 extern crate serde_derive;
 extern crate chrono;
-extern crate colored;
 extern crate itertools;
 extern crate keyring;
-extern crate pbr;
 extern crate rpassword;
 extern crate serde;
 extern crate serde_json;
 extern crate tempfile;
+extern crate term;
 extern crate unijudge;
 extern crate wait_timeout;
 extern crate walkdir;
@@ -31,15 +30,13 @@ mod fitness;
 mod util;
 
 use cli::{Args, Command};
-use colored::Colorize;
 use commands::build::Codegen;
 use error::*;
-use std::borrow::Borrow;
+use std::{borrow::Borrow, ops::DerefMut};
 use structopt::StructOpt;
+use ui::Ui;
 
-fn run() -> R<()> {
-	let args = Args::from_args();
-	let Args { ui, command } = args;
+fn run(command: Command, ui: &mut Ui) -> R<()> {
 	match command {
 		Command::Build {
 			source,
@@ -62,7 +59,7 @@ fn run() -> R<()> {
 			checker,
 			no_print_success,
 			print_output,
-		} => commands::test::run(executable.as_path(), testdir.as_path(), checker.borrow(), no_print_success, print_output, ui.borrow()),
+		} => commands::test::run(executable.as_path(), testdir.as_path(), checker.borrow(), no_print_success, print_output, ui),
 		Command::Multitest {
 			gen,
 			executables,
@@ -79,26 +76,23 @@ fn run() -> R<()> {
 			fitness.borrow(),
 			time_limit,
 			ignore_generator_fail,
-			ui.borrow(),
+			ui,
 		),
-		Command::Vendor { source } => commands::vendor::run(source.as_path()),
+		Command::Vendor { source } => commands::vendor::run(source.as_path(), ui),
 		Command::GenerateAutocomplete { shell } => commands::genautocomplete::run(shell),
-		Command::Init { url } => commands::init::run(&url, ui.borrow()),
-		Command::Submit { source, url } => commands::submit::run(&url, &source, ui.borrow()),
-		Command::ListResources { url } => commands::list_resources::run(&url, ui.borrow()),
-		Command::Download { url, id, file } => commands::download::run(&url, &id, &file, ui.borrow()),
-		Command::TrackSubmit { url, id, sleep_duration } => commands::tracksubmit::run(&url, id, sleep_duration, ui.borrow()),
+		Command::Init { url } => commands::init::run(&url, ui),
+		Command::Submit { source, url } => commands::submit::run(&url, &source, ui),
+		Command::ListResources { url } => commands::list_resources::run(&url, ui),
+		Command::Download { url, id, file } => commands::download::run(&url, &id, &file, ui),
+		Command::TrackSubmit { url, id, sleep_duration } => commands::tracksubmit::run(&url, id, sleep_duration, ui),
 	}
 }
 
 fn main() {
-	if let Err(e) = run() {
-		let error_prefix = "error".red().bold();
-		let cause_prefix = "caused by".yellow().bold();
-		eprintln!("{}: {}", error_prefix, e);
-		for cause in e.iter_causes().skip(1) {
-			eprintln!("{}: {}", cause_prefix, cause);
-		}
+	let args = Args::from_args();
+	let Args { mut ui, command } = args;
+	if let Err(e) = run(command, ui.deref_mut()) {
+		ui.print_error(e);
 		::std::process::exit(1);
 	}
 }

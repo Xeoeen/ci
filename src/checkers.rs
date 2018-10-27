@@ -1,6 +1,5 @@
-use diagnose::diagnose_app;
 use error::*;
-use std::{self, path::Path};
+use std;
 use strres::StrRes;
 
 pub trait Checker {
@@ -25,7 +24,7 @@ pub struct CheckerApp {
 
 impl CheckerApp {
 	pub fn new(app: String) -> R<CheckerApp> {
-		diagnose_app(Path::new(&app))?;
+		// TODO: diagnose checker
 		Ok(CheckerApp { app })
 	}
 }

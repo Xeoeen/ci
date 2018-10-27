@@ -49,13 +49,11 @@ fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>
 	Box::new(tests.into_iter())
 }
 
-pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_success: bool, print_output: bool, ui: &Ui) -> R<()> {
+pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_success: bool, print_output: bool, ui: &mut Ui) -> R<()> {
 	ensure!(testdir.exists(), err_msg("test directory does not exist"));
-	diagnose_app(&executable)?;
-	diagnose_checker(checker)?;
-	let test_count = recursive_find_tests(&testdir).count();
+	diagnose_app(&executable, ui)?;
+	diagnose_checker(checker, ui)?;
 	let mut good = true;
-	let mut pb = ui.create_progress_bar(test_count);
 	for in_path in recursive_find_tests(&testdir) {
 		let out_path = in_path.with_extension("out");
 		let (output, outcome, timing) = if out_path.exists() {
@@ -65,12 +63,11 @@ pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_succes
 			(StrRes::Empty, TestResult::IgnoredNoOut, None)
 		};
 		if outcome != TestResult::Accept || !no_print_success {
-			pb.print_test(&outcome, timing, &in_path, if print_output { Some(output) } else { None });
+			ui.print_test(&outcome, timing, &in_path, if print_output { Some(output) } else { None });
 		}
 		if outcome != TestResult::Accept {
 			good = false;
 		}
-		pb.increment();
 	}
 	if !good {
 		std::process::exit(1);

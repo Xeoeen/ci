@@ -1,5 +1,4 @@
 use checkers::Checker;
-use colored::{self, ColoredString, Colorize};
 use error::*;
 use std::{self, path::Path, time::Duration};
 use strres::{exec, StrRes};
@@ -11,25 +10,6 @@ pub enum TestResult {
 	WrongAnswer,
 	RuntimeError,
 	IgnoredNoOut,
-}
-impl TestResult {
-	pub fn format_long(&self) -> ColoredString {
-		self.apply_color(match *self {
-			TestResult::Accept => "ACCEPT       ",
-			TestResult::WrongAnswer => "WRONG ANSWER ",
-			TestResult::RuntimeError => "RUNTIME ERROR",
-			TestResult::IgnoredNoOut => "IGNORED      ",
-		})
-	}
-
-	pub fn apply_color(&self, s: &str) -> ColoredString {
-		s.color(match *self {
-			TestResult::Accept => colored::Color::Green,
-			TestResult::WrongAnswer => colored::Color::Red,
-			TestResult::RuntimeError => colored::Color::Red,
-			TestResult::IgnoredNoOut => colored::Color::Yellow,
-		}).bold()
-	}
 }
 pub fn test_single(executable: &Path, input: StrRes, perfect_output: StrRes, checker: &Checker, time_limit: Option<&Duration>) -> R<(StrRes, TestResult, std::time::Duration)> {
 	let (my_output, timing) = timefn(|| exec(executable, input.clone(), time_limit));

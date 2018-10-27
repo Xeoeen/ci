@@ -43,14 +43,6 @@ impl StrRes {
 			StrRes::Empty => StrRes::Empty,
 		}
 	}
-
-	pub fn print_to_stdout(&self) {
-		match *self {
-			StrRes::InMemory(ref s) => print!("{}", s),
-			StrRes::Empty => (),
-			_ => unimplemented!("StrRes::print_to_stdout"),
-		}
-	}
 }
 
 pub fn exec(executable: &Path, input: StrRes, time_limit: Option<&Duration>) -> R<StrRes> {

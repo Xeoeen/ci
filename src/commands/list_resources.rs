@@ -11,7 +11,7 @@ pub struct Resource {
 	pub id: String,
 }
 
-pub fn run(url: &str, ui: &Ui) -> R<()> {
+pub fn run(url: &str, ui: &mut Ui) -> R<()> {
 	let tu = unijudge::TaskUrl::deconstruct(url);
 	let sess = connect(url, ui);
 	let cont = sess.contest(&tu.contest);

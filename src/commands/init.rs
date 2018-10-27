@@ -4,7 +4,7 @@ use ui::Ui;
 use unijudge;
 use util::{connect, demand_dir, writefile};
 
-pub fn run(url: &str, ui: &Ui) -> R<()> {
+pub fn run(url: &str, ui: &mut Ui) -> R<()> {
 	let tu = unijudge::TaskUrl::deconstruct(url);
 	let sess = connect(url, ui);
 	let cont = sess.contest(&tu.contest);

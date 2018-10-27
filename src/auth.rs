@@ -1,7 +1,7 @@
 use keyring::{Keyring, KeyringError};
 use ui::Ui;
 
-pub fn get(domain: &str, ui: &Ui) -> (String, String) {
+pub fn get(domain: &str, ui: &mut Ui) -> (String, String) {
 	let key = Keyring::new("ci", domain);
 	match key.get_password() {
 		Ok(entry) => {
