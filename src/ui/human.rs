@@ -6,7 +6,7 @@ use commands::{
 use failure;
 use rpassword;
 use std::{
-	self, io::{stderr, stdin, stdout, Write}, path::Path, time::Duration
+	self, io::{stderr, stdin, stdout, Write}, marker::{Send, Sync}, path::Path, time::Duration
 };
 use strres::StrRes;
 use term;
@@ -30,6 +30,8 @@ impl Human {
 		self.term.reset().unwrap();
 	}
 }
+unsafe impl Sync for Human {}
+unsafe impl Send for Human {}
 impl Ui for Human {
 	fn read_auth(&mut self, domain: &str) -> (String, String) {
 		eprintln!("Login required to {}", domain);

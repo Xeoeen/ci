@@ -2,7 +2,7 @@ use error::*;
 use std;
 use strres::StrRes;
 
-pub trait Checker {
+pub trait Checker: Sync {
 	fn check(&self, input: StrRes, my_output: StrRes, perfect_output: StrRes) -> R<bool>;
 	fn is_default(&self) -> bool;
 }

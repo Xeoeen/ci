@@ -19,7 +19,7 @@ pub fn timefmt(t: std::time::Duration) -> String {
 	format!("{}.{:02}s", t.as_secs(), t.subsec_nanos() / 10_000_000)
 }
 
-pub trait Ui {
+pub trait Ui: Sync + Send {
 	fn read_auth(&mut self, domain: &str) -> (String, String);
 	fn track_progress(&mut self, status: &commands::tracksubmit::Status);
 	fn submit_success(&mut self, id: String);

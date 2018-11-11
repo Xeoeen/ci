@@ -48,6 +48,14 @@ fn parse_ui(s: &str) -> R<Box<ui::Ui>> {
 	})
 }
 
+fn parse_threads_num(s: &str) -> R<usize> {
+	let threads: usize  = s.parse()?;
+	if threads == 0 {
+		return Err(format_err!("number of threads must be positive"));
+	}
+	Ok(threads)
+}
+
 #[derive(StructOpt)]
 #[structopt(
 	name = "ci",
@@ -57,6 +65,8 @@ fn parse_ui(s: &str) -> R<Box<ui::Ui>> {
 pub struct Args {
 	#[structopt(long = "format", parse(try_from_str = "parse_ui"), default_value = "human", help = "User interface format")]
 	pub ui: Box<ui::Ui>,
+	#[structopt(long = "threads", parse(try_from_str = "parse_threads_num"), default_value = "1", help = "Number of executioner threads", raw(global = "true"))]
+	pub threads: usize,
 	#[structopt(subcommand)]
 	pub command: Command,
 }

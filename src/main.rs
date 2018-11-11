@@ -7,6 +7,7 @@ extern crate serde_derive;
 extern crate chrono;
 extern crate itertools;
 extern crate keyring;
+extern crate rayon;
 extern crate rpassword;
 extern crate serde;
 extern crate serde_json;
@@ -90,7 +91,8 @@ fn run(command: Command, ui: &mut Ui) -> R<()> {
 
 fn main() {
 	let args = Args::from_args();
-	let Args { mut ui, command } = args;
+	let Args { mut ui, threads, command } = args;
+	rayon::ThreadPoolBuilder::new().num_threads(threads).build_global().unwrap();
 	if let Err(e) = run(command, ui.deref_mut()) {
 		ui.print_error(e);
 		::std::process::exit(1);
