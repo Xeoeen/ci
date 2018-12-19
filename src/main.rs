@@ -1,40 +1,8 @@
-#[macro_use]
-extern crate structopt;
+extern crate ci;
 #[macro_use]
 extern crate failure;
-#[macro_use]
-extern crate serde_derive;
-extern crate chrono;
-extern crate itertools;
-extern crate keyring;
-extern crate rpassword;
-extern crate serde;
-extern crate serde_json;
-extern crate tempfile;
-extern crate term;
-extern crate unijudge;
-extern crate wait_timeout;
-extern crate walkdir;
 
-mod auth;
-mod checkers;
-mod diagnose;
-mod error;
-mod strres;
-mod testing;
-#[macro_use]
-mod ui;
-mod cli;
-mod commands;
-mod fitness;
-mod util;
-
-use cli::{Args, Command};
-use commands::build::Codegen;
-use error::*;
-use std::{borrow::Borrow, ops::DerefMut};
-use structopt::StructOpt;
-use ui::Ui;
+use ci::*;
 
 fn run(command: Command, ui: &mut Ui) -> R<()> {
 	match command {
@@ -59,7 +27,12 @@ fn run(command: Command, ui: &mut Ui) -> R<()> {
 			checker,
 			no_print_success,
 			print_output,
-		} => commands::test::run(executable.as_path(), testdir.as_path(), checker.borrow(), no_print_success, print_output, ui),
+		} => {
+			let success = commands::test::run(executable.as_path(), testdir.as_path(), checker.borrow(), no_print_success, print_output, ui)?;
+			if !success {
+				std::process::exit(1);
+			}
+		},
 		Command::Multitest {
 			gen,
 			executables,

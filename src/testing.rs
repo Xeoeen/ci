@@ -4,7 +4,7 @@ use std::{self, path::Path, time::Duration};
 use strres::{exec, StrRes};
 use util::timefn;
 
-#[derive(PartialEq, Eq, Serialize)]
+#[derive(PartialEq, Clone, Eq, Serialize, Debug)]
 pub enum TestResult {
 	Accept,
 	WrongAnswer,

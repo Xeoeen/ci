@@ -1,6 +1,7 @@
 use error::*;
 use std::{self, ffi::OsStr, path::Path};
 
+#[derive(Debug)]
 pub enum CppVer {
 	Cpp11,
 	Cpp17,

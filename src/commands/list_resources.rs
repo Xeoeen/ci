@@ -23,7 +23,8 @@ pub fn run(url: &str, ui: &mut Ui) -> R<()> {
 			description: rsrc.description,
 			filename: rsrc.filename,
 			id: rsrc.id,
-		}).collect::<Vec<_>>();
+		})
+		.collect::<Vec<_>>();
 	ui.print_resource_list(&resources);
 	Ok(())
 }

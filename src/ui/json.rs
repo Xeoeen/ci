@@ -48,9 +48,12 @@ impl Ui for Json {
 				outcome,
 				output: output.map(|o| o.get_string().unwrap()),
 				timing
-			}).unwrap()
+			})
+			.unwrap()
 		);
 	}
+
+	fn print_finish_test(&mut self, _success: bool) {}
 
 	fn print_transpiled(&mut self, _compiled: &str) {
 		unimplemented!()

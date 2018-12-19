@@ -49,7 +49,7 @@ fn recursive_find_tests(testdir: &Path) -> Box<Iterator<Item=std::path::PathBuf>
 	Box::new(tests.into_iter())
 }
 
-pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_success: bool, print_output: bool, ui: &mut Ui) -> R<()> {
+pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_success: bool, print_output: bool, ui: &mut Ui) -> R<bool> {
 	ensure!(testdir.exists(), err_msg("test directory does not exist"));
 	diagnose_app(&executable, ui)?;
 	diagnose_checker(checker, ui)?;
@@ -69,8 +69,6 @@ pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_succes
 			good = false;
 		}
 	}
-	if !good {
-		std::process::exit(1);
-	}
-	Ok(())
+	ui.print_finish_test(good);
+	Ok(good)
 }
