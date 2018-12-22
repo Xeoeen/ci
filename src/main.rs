@@ -3,6 +3,7 @@ extern crate ci;
 extern crate failure;
 
 use ci::*;
+use std::env;
 
 fn run(command: Command, ui: &mut Ui) -> R<()> {
 	match command {
@@ -32,6 +33,7 @@ fn run(command: Command, ui: &mut Ui) -> R<()> {
 			if !success {
 				std::process::exit(1);
 			}
+			Ok(())
 		},
 		Command::Multitest {
 			gen,
@@ -53,7 +55,7 @@ fn run(command: Command, ui: &mut Ui) -> R<()> {
 		),
 		Command::Vendor { source } => commands::vendor::run(source.as_path(), ui),
 		Command::GenerateAutocomplete { shell } => commands::genautocomplete::run(shell),
-		Command::Init { url } => commands::init::run(&url, ui),
+		Command::Init { url } => commands::init::run(&url, &env::current_dir()?, ui),
 		Command::Submit { source, url } => commands::submit::run(&url, &source, ui),
 		Command::ListResources { url } => commands::list_resources::run(&url, ui),
 		Command::Download { url, id, file } => commands::download::run(&url, &id, &file, ui),

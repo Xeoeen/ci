@@ -93,6 +93,8 @@ impl Ui for Human {
 
 	fn print_finish_test(&mut self, _success: bool) {}
 
+	fn print_finish_init(&mut self) {}
+
 	fn print_transpiled(&mut self, compiled: &str) {
 		println!("{}", compiled);
 	}
