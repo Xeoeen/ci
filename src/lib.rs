@@ -35,3 +35,4 @@ pub use error::*;
 pub use std::{borrow::Borrow, ops::DerefMut};
 pub use structopt::StructOpt;
 pub use ui::Ui;
+pub use util::connect;
