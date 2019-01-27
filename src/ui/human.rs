@@ -41,7 +41,7 @@ impl Ui for Human {
 		(username, password)
 	}
 
-	fn track_progress(&mut self, verdict: &unijudge::Verdict) {
+	fn track_progress(&mut self, verdict: &unijudge::Verdict, _finish: bool) {
 		let message = fmt_verdict(verdict);
 		eprintln!("{} {}", Local::now(), message);
 	}
@@ -79,8 +79,6 @@ impl Ui for Human {
 	fn print_finish_test(&mut self, _success: bool) {}
 
 	fn print_finish_init(&mut self) {}
-
-	fn print_finish_tracksubmit(&mut self, _verdict: unijudge::Verdict) {}
 
 	fn print_transpiled(&mut self, compiled: &str) {
 		println!("{}", compiled);

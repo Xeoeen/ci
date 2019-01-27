@@ -11,13 +11,12 @@ pub fn run(url: &str, id: String, sleep_duration: Duration, ui: &mut Ui) -> R<()
 	loop {
 		let submissions = cont.submissions_recent();
 		let submission = submissions.into_iter().find(|subm| subm.id == id).unwrap();
-		ui.track_progress(&submission.verdict);
 		let should_end = match &submission.verdict {
 			unijudge::Verdict::Pending { .. } => false,
 			_ => true,
 		};
+		ui.track_progress(&submission.verdict, should_end);
 		if should_end {
-			ui.print_finish_tracksubmit(submission.verdict);
 			break;
 		}
 		thread::sleep(sleep_duration);

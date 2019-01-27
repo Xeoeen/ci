@@ -17,7 +17,7 @@ impl Ui for None {
 		unimplemented!()
 	}
 
-	fn track_progress(&mut self, _verdict: &unijudge::Verdict) {}
+	fn track_progress(&mut self, _verdict: &unijudge::Verdict, _finish: bool) {}
 
 	fn submit_success(&mut self, _id: String) {}
 
@@ -30,8 +30,6 @@ impl Ui for None {
 	fn print_finish_test(&mut self, _success: bool) {}
 
 	fn print_finish_init(&mut self) {}
-
-	fn print_finish_tracksubmit(&mut self, _verdict: unijudge::Verdict) {}
 
 	fn print_transpiled(&mut self, _compiled: &str) {}
 
