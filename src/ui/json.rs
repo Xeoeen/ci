@@ -57,6 +57,8 @@ impl Ui for Json {
 
 	fn print_finish_init(&mut self) {}
 
+	fn print_finish_tracksubmit(&mut self, _verdict: unijudge::Verdict) {}
+
 	fn print_transpiled(&mut self, _compiled: &str) {
 		unimplemented!()
 	}

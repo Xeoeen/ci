@@ -31,6 +31,8 @@ impl Ui for None {
 
 	fn print_finish_init(&mut self) {}
 
+	fn print_finish_tracksubmit(&mut self, _verdict: unijudge::Verdict) {}
+
 	fn print_transpiled(&mut self, _compiled: &str) {}
 
 	fn print_found_test(&mut self, _test_str: &str) {}

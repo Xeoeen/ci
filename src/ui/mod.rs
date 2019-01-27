@@ -29,6 +29,7 @@ pub trait Ui {
 	fn print_test(&mut self, outcome: &TestResult, timing: Option<Duration>, in_path: &Path, output: Option<StrRes>);
 	fn print_finish_test(&mut self, success: bool);
 	fn print_finish_init(&mut self);
+	fn print_finish_tracksubmit(&mut self, verdict: unijudge::Verdict);
 	fn print_transpiled(&mut self, compiled: &str);
 	fn print_found_test(&mut self, test_str: &str);
 	fn print_error(&mut self, error: failure::Error);
