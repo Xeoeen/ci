@@ -178,6 +178,9 @@ pub fn fmt_verdict(verdict: &unijudge::Verdict) -> String {
 			message += "Pending";
 			message += &fmt_testid(&test);
 		},
+		unijudge::Verdict::Skipped => {
+			message += "Skipped";
+		},
 	};
 	message
 }
