@@ -1,8 +1,6 @@
 use super::Ui;
 use chrono::Local;
-use commands::{
-	list_resources::Resource, tracksubmit::{Compilation, Outcome, Status}
-};
+use commands::list_resources::Resource;
 use failure;
 use rpassword;
 use std::{
@@ -12,6 +10,7 @@ use strres::StrRes;
 use term;
 use testing::TestResult;
 use ui::timefmt;
+use unijudge::RejectionCause;
 
 pub struct Human {
 	term: Box<term::StderrTerminal>,
@@ -42,22 +41,8 @@ impl Ui for Human {
 		(username, password)
 	}
 
-	fn track_progress(&mut self, status: &Status) {
-		let message = match status {
-			Status {
-				compilation: Compilation::Pending,
-				..
-			} => "Compilation pending...".to_string(),
-			Status {
-				compilation: Compilation::Failure,
-				..
-			} => "Compilation error".to_string(),
-			Status { initial: Outcome::Pending, .. } => "Initial tests pending...".to_string(),
-			Status {
-				full: Outcome::Pending, initial, ..
-			} => format!("{}Score pending...", self.fmt_initial(initial)),
-			Status { full, .. } => self.fmt_full(full),
-		};
+	fn track_progress(&mut self, verdict: &unijudge::Verdict) {
+		let message = fmt_verdict(verdict);
 		eprintln!("{} {}", Local::now(), message);
 	}
 
@@ -153,30 +138,6 @@ impl Ui for Human {
 }
 
 impl Human {
-	fn fmt_initial(&mut self, outcome: &Outcome) -> String {
-		match outcome {
-			Outcome::Score(score) => format!("Initial tests scored {}. ", score),
-			Outcome::Failure => "Initial tests failed. ".to_string(),
-			Outcome::Success => "Initial tests passed. ".to_string(),
-			Outcome::Pending => panic!("formatting pending initiial tests"),
-			Outcome::Unsupported => "".to_string(),
-			Outcome::Skipped => "".to_string(),
-			Outcome::Waiting => panic!("formatting waiting initial tests"),
-		}
-	}
-
-	fn fmt_full(&mut self, outcome: &Outcome) -> String {
-		match outcome {
-			Outcome::Score(score) => format!("Scored {}!", score),
-			Outcome::Failure => "Rejected".to_string(),
-			Outcome::Success => "Accepted".to_string(),
-			Outcome::Pending => panic!("formatting pending tests"),
-			Outcome::Unsupported => panic!("formatting unsupported tests"),
-			Outcome::Skipped => panic!("formatting skipped tests"),
-			Outcome::Waiting => panic!("formatting waiting tests"),
-		}
-	}
-
 	fn fmt_test_long(&mut self, outcome: &TestResult) -> &'static str {
 		match outcome {
 			TestResult::Accept => "ACCEPT       ",
@@ -194,4 +155,47 @@ fn color_testr(outi: &TestResult) -> term::color::Color {
 		TestResult::RuntimeError => term::color::RED,
 		TestResult::IgnoredNoOut => term::color::YELLOW,
 	}
+}
+
+pub fn fmt_verdict(verdict: &unijudge::Verdict) -> String {
+	let mut message = String::new();
+	match verdict {
+		unijudge::Verdict::Scored { score, max, cause, test } => {
+			message += &format!("Scored {}", score);
+			message += &max.map(|max| format!(" out of {}", max)).unwrap_or("".to_string());
+			message += fmt_cause_withtest(&cause, &test);
+			message += &fmt_testid(&test);
+		},
+		unijudge::Verdict::Accepted => {
+			message += "Accepted";
+		},
+		unijudge::Verdict::Rejected { cause, test } => {
+			message += "Rejected";
+			message += fmt_cause_withtest(&cause, &test);
+			message += &fmt_testid(&test);
+		},
+		unijudge::Verdict::Pending { test } => {
+			message += "Pending";
+			message += &fmt_testid(&test);
+		},
+	};
+	message
+}
+
+fn fmt_cause_withtest(cause: &Option<RejectionCause>, test: &Option<String>) -> &'static str {
+	match (cause, test) {
+		(Some(RejectionCause::WrongAnswer), _) => " due to a Wrong Answer",
+		(Some(RejectionCause::RuntimeError), _) => " due to a Runtime Error",
+		(Some(RejectionCause::TimeLimitExceeded), _) => " due to a Time Limit Exceeded",
+		(Some(RejectionCause::MemoryLimitExceeded), _) => " due to a Memory Limit Exceeded",
+		(Some(RejectionCause::RuleViolation), _) => " due to a Rule Violation",
+		(Some(RejectionCause::SystemError), _) => " due to a System Error",
+		(Some(RejectionCause::CompilationError), _) => " due to a Compilation Error",
+		(_, Some(_)) => " failing",
+		(None, None) => "",
+	}
+}
+
+fn fmt_testid(test: &Option<String>) -> String {
+	test.as_ref().map(|test| format!(" on {}", test)).unwrap_or("".to_string())
 }

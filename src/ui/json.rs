@@ -1,5 +1,5 @@
 use super::Ui;
-use commands::{self, list_resources::Resource};
+use commands::list_resources::Resource;
 use failure;
 use serde_json;
 use std::{
@@ -24,8 +24,8 @@ impl Ui for Json {
 		(resp.username, resp.password)
 	}
 
-	fn track_progress(&mut self, status: &commands::tracksubmit::Status) {
-		println!("{}", serde_json::to_string(&status).unwrap());
+	fn track_progress(&mut self, _verdict: &unijudge::Verdict) {
+		unimplemented!()
 	}
 
 	fn submit_success(&mut self, id: String) {

@@ -1,5 +1,5 @@
 use super::Ui;
-use commands::{list_resources::Resource, tracksubmit::Status};
+use commands::list_resources::Resource;
 use error::Error;
 use std::{path::Path, time::Duration};
 use strres::StrRes;
@@ -17,7 +17,7 @@ impl Ui for None {
 		unimplemented!()
 	}
 
-	fn track_progress(&mut self, _status: &Status) {}
+	fn track_progress(&mut self, _verdict: &unijudge::Verdict) {}
 
 	fn submit_success(&mut self, _id: String) {}
 

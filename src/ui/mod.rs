@@ -22,7 +22,7 @@ pub fn timefmt(t: std::time::Duration) -> String {
 
 pub trait Ui {
 	fn read_auth(&mut self, domain: &str) -> (String, String);
-	fn track_progress(&mut self, status: &commands::tracksubmit::Status);
+	fn track_progress(&mut self, verdict: &unijudge::Verdict);
 	fn submit_success(&mut self, id: String);
 	fn print_resource_list(&mut self, resources: &[commands::list_resources::Resource]);
 	fn print_resource(&mut self, data: &[u8]);
