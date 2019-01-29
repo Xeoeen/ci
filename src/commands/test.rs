@@ -53,8 +53,10 @@ pub fn run(executable: &Path, testdir: &Path, checker: &Checker, no_print_succes
 	ensure!(testdir.exists(), err_msg("test directory does not exist"));
 	diagnose_app(&executable, ui)?;
 	diagnose_checker(checker, ui)?;
+	let tests = recursive_find_tests(&testdir).collect::<Vec<_>>();
+	ui.test_list(&tests);
 	let mut good = true;
-	for in_path in recursive_find_tests(&testdir) {
+	for in_path in tests {
 		let out_path = in_path.with_extension("out");
 		let (output, outcome, timing) = if out_path.exists() {
 			let (out, outcome, timing) = test_single(&executable, StrRes::from_path(&in_path), StrRes::from_path(&out_path), checker.borrow(), None)?;

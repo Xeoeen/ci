@@ -24,6 +24,7 @@ pub trait Ui {
 	fn read_auth(&mut self, domain: &str) -> (String, String);
 	fn track_progress(&mut self, verdict: &unijudge::Verdict, finish: bool);
 	fn submit_success(&mut self, id: String);
+	fn test_list(&mut self, paths: &[PathBuf]);
 	fn print_resource_list(&mut self, resources: &[commands::list_resources::Resource]);
 	fn print_resource(&mut self, data: &[u8]);
 	fn print_test(&mut self, outcome: &TestResult, timing: Option<Duration>, in_path: &Path, output: Option<StrRes>);
@@ -45,6 +46,8 @@ pub trait Ui {
 
 pub use self::{human::Human, json::Json};
 use commands;
-use std::{path::Path, time::Duration};
+use std::{
+	path::{Path, PathBuf}, time::Duration
+};
 use strres::StrRes;
 use testing::TestResult;

@@ -1,7 +1,9 @@
 use super::Ui;
 use commands::list_resources::Resource;
 use error::Error;
-use std::{path::Path, time::Duration};
+use std::{
+	path::{Path, PathBuf}, time::Duration
+};
 use strres::StrRes;
 use testing::TestResult;
 
@@ -20,6 +22,8 @@ impl Ui for None {
 	fn track_progress(&mut self, _verdict: &unijudge::Verdict, _finish: bool) {}
 
 	fn submit_success(&mut self, _id: String) {}
+
+	fn test_list(&mut self, _paths: &[PathBuf]) {}
 
 	fn print_resource_list(&mut self, _resources: &[Resource]) {}
 

@@ -4,7 +4,7 @@ use commands::list_resources::Resource;
 use failure;
 use rpassword;
 use std::{
-	self, io::{stderr, stdin, stdout, Write}, path::Path, time::Duration
+	self, io::{stderr, stdin, stdout, Write}, path::{Path, PathBuf}, time::Duration
 };
 use strres::StrRes;
 use term;
@@ -49,6 +49,8 @@ impl Ui for Human {
 	fn submit_success(&mut self, id: String) {
 		eprintln!("Solution submitted, submission id: {}", id);
 	}
+
+	fn test_list(&mut self, _paths: &[PathBuf]) {}
 
 	fn print_resource_list(&mut self, resources: &[Resource]) {
 		for resource in resources {

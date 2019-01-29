@@ -3,7 +3,7 @@ use commands::list_resources::Resource;
 use failure;
 use serde_json;
 use std::{
-	io::{stdin, stdout, Write}, path::Path, time::Duration
+	io::{stdin, stdout, Write}, path::{Path, PathBuf}, time::Duration
 };
 use strres::StrRes;
 use testing::TestResult;
@@ -31,6 +31,8 @@ impl Ui for Json {
 	fn submit_success(&mut self, id: String) {
 		println!("{}", serde_json::to_string(&SubmitResult { id }).unwrap());
 	}
+
+	fn test_list(&mut self, _paths: &[PathBuf]) {}
 
 	fn print_resource_list(&mut self, resources: &[Resource]) {
 		println!("{}", serde_json::to_string(&resources).unwrap());
