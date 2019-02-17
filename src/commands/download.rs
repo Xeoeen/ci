@@ -5,12 +5,12 @@ use unijudge;
 use util::connect;
 
 pub fn run(url: &str, id: &str, file: &Path, ui: &mut Ui) -> R<()> {
-	let tu = unijudge::TaskUrl::deconstruct(url);
-	let sess = connect(url, ui);
+	let tu = unijudge::TaskUrl::deconstruct(url)?;
+	let sess = connect(url, ui)?;
 	let cont = sess.contest(&tu.contest);
-	let resources = cont.resources();
+	let resources = cont.resources()?;
 	let resource = resources.iter().find(|rsrc| rsrc.id == id).unwrap();
-	let contents = cont.resource_fetch(resource);
+	let contents = cont.resource_fetch(resource)?;
 	fs::write(file, contents)?;
 	Ok(())
 }

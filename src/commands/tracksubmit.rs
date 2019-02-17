@@ -5,11 +5,11 @@ use unijudge;
 use util::connect;
 
 pub fn run(url: &str, id: String, sleep_duration: Duration, ui: &mut Ui) -> R<()> {
-	let tu = unijudge::TaskUrl::deconstruct(url);
-	let sess = connect(url, ui);
+	let tu = unijudge::TaskUrl::deconstruct(url)?;
+	let sess = connect(url, ui)?;
 	let cont = sess.contest(&tu.contest);
 	loop {
-		let submissions = cont.submissions_recent();
+		let submissions = cont.submissions_recent()?;
 		let submission = submissions.into_iter().find(|subm| subm.id == id).unwrap();
 		let should_end = match &submission.verdict {
 			unijudge::Verdict::Pending { .. } => false,

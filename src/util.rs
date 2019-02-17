@@ -1,4 +1,5 @@
 use auth;
+use error::R;
 use keyring::{Keyring, KeyringError};
 use std::{
 	self, fs::{create_dir, File}, io::{self, Write}, path::Path
@@ -23,22 +24,22 @@ pub fn demand_dir(path: &Path) -> Result<(), io::Error> {
 	}
 }
 
-pub fn connect(url: &str, ui: &mut Ui) -> Box<unijudge::Session> {
-	let tu = unijudge::TaskUrl::deconstruct(url);
+pub fn connect(url: &str, ui: &mut Ui) -> R<Box<unijudge::Session>> {
+	let tu = unijudge::TaskUrl::deconstruct(url)?;
 	let keyring_name = format!("{} @sessionid", tu.site);
 	let keyring = Keyring::new("ci", &keyring_name);
 	match keyring.get_password() {
-		Ok(session_id) => unijudge::connect_cached(&tu.site, &session_id),
+		Ok(session_id) => Ok(unijudge::connect_cached(&tu.site, &session_id)?),
 		Err(KeyringError::NoPasswordFound) => {
 			let (user, pass) = auth::get(&tu.site, ui);
-			let sess = unijudge::connect_login(&tu.site, &user, &pass);
-			if let Some(session_id) = sess.cache_sessionid() {
-				keyring.set_password(&session_id).unwrap();
+			let sess = unijudge::connect_login(&tu.site, &user, &pass)?;
+			if let Some(session_id) = sess.cache_sessionid()? {
+				keyring.set_password(&session_id).map_err(failure::SyncFailure::new)?;
 			} else {
 				ui.notice("could not cache session, expect slow connecting");
 			}
-			sess
+			Ok(sess)
 		},
-		Err(e) => Err(e).unwrap(),
+		Err(e) => Err(failure::SyncFailure::new(e))?,
 	}
 }

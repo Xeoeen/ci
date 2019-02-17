@@ -12,11 +12,11 @@ pub struct Resource {
 }
 
 pub fn run(url: &str, ui: &mut Ui) -> R<()> {
-	let tu = unijudge::TaskUrl::deconstruct(url);
-	let sess = connect(url, ui);
+	let tu = unijudge::TaskUrl::deconstruct(url)?;
+	let sess = connect(url, ui)?;
 	let cont = sess.contest(&tu.contest);
 	let resources = cont
-		.resources()
+		.resources()?
 		.into_iter()
 		.map(|rsrc| Resource {
 			name: rsrc.name,
